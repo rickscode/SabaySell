@@ -1,0 +1,158 @@
+{
+  "app_name": "SabaySell",
+  "tagline": "Cambodia Online Marketplace",
+  "description": "Free online marketplace for Cambodia",
+  "start_selling": "Start Selling",
+  "browse_listings": "Browse Listings",
+
+  "header": {
+    "search_placeholder": "Search for anything...",
+    "search_button": "Search",
+    "sell": "Sell",
+    "notifications": "Notifications",
+    "messages": "Messages",
+    "watchlist": "Watchlist",
+    "login": "Log In",
+    "profile": "Profile",
+    "my_listings": "My Listings",
+    "settings": "Settings",
+    "logout": "Log out",
+    "create_listing": "Create Listing"
+  },
+
+  "categories": {
+    "title": "Shop by Category",
+    "electronics": "Electronics",
+    "mobile_phones": "Mobile Phones",
+    "jewellery_watches": "Jewellery and Watches",
+    "home_garden": "Home & Garden",
+    "fashion": "Fashion",
+    "books": "Books",
+    "automobiles": "Automobiles",
+    "toys": "Toys",
+    "tools": "Tools",
+    "sports": "Sports Equipment",
+    "school": "School Equipment",
+    "other": "Other",
+    "more": "More"
+  },
+
+  "actions": {
+    "load_more": "Load More Items"
+  },
+
+  "filters": {
+    "title": "Filters",
+    "condition": "Condition",
+    "price_range": "Price Range",
+    "format": "Format",
+    "buying_format": "Buying Format",
+    "location": "Location",
+    "shipping": "Shipping",
+    "shipping_options": "Shipping Options",
+    "new": "New",
+    "used": "Used",
+    "refurbished": "Refurbished",
+    "auction": "Auction",
+    "buy_now": "Buy Now",
+    "buy_it_now": "Buy It Now",
+    "accepts_offers": "Accepts Offers",
+    "phnom_penh": "Phnom Penh",
+    "siem_reap": "Siem Reap",
+    "sihanoukville": "Sihanoukville",
+    "kampot": "Kampot",
+    "other_location": "Other",
+    "free_shipping": "Free Shipping",
+    "paid_shipping": "Paid Shipping",
+    "local_pickup": "Local Pickup",
+    "min_price": "Min",
+    "max_price": "Max",
+    "to": "to",
+    "apply": "Apply Filters",
+    "reset": "Reset",
+    "clear_all": "Clear All Filters"
+  },
+
+  "products": {
+    "results": "results",
+    "showing": "Showing",
+    "sort_by": "Sort by",
+    "best_match": "Best Match",
+    "newest": "Newest First",
+    "price_low_high": "Price: Low to High",
+    "price_high_low": "Price: High to Low",
+    "ending_soon": "Ending Soon",
+    "condition": "Condition",
+    "auction": "Auction",
+    "buy_now": "Buy Now",
+    "place_bid": "Place Bid",
+    "add_to_cart": "Add to Cart",
+    "current_bid": "Current Bid",
+    "time_left": "Time Left",
+    "shipping_free": "Free Shipping",
+    "shipping_paid": "Paid Shipping",
+    "pickup_only": "Pickup Only"
+  },
+
+  "footer": {
+    "buy": {
+      "title": "Buy",
+      "browse": "Browse All",
+      "categories": "Categories",
+      "saved": "Saved Items",
+      "help": "Bidding Help"
+    },
+    "sell": {
+      "title": "Sell",
+      "start": "Start Selling",
+      "learn": "Learn to Sell",
+      "seller_help": "Seller Help",
+      "stores": "Stores"
+    },
+    "about": {
+      "title": "About",
+      "company": "Company Info",
+      "news": "News",
+      "careers": "Careers",
+      "contact": "Contact Us"
+    },
+    "help": {
+      "title": "Help & Support",
+      "contact": "Contact Us",
+      "resolution": "Resolution Center",
+      "business": "Business Sellers"
+    }
+  },
+
+  "common": {
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "close": "Close",
+    "edit": "Edit",
+    "delete": "Delete",
+    "confirm": "Confirm",
+    "back": "Back",
+    "next": "Next",
+    "submit": "Submit",
+    "send": "Send",
+    "view": "View",
+    "share": "Share",
+    "report": "Report"
+  },
+
+  "features": {
+    "free_listings": {
+      "title": "Free Listings",
+      "description": "Post your items for free. No hidden fees."
+    },
+    "live_auctions": {
+      "title": "Live Auctions",
+      "description": "Real-time bidding on exciting items."
+    },
+    "safe_chat": {
+      "title": "Safe Chat",
+      "description": "Connect with buyers & sellers securely."
+    }
+  }
+}

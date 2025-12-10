@@ -1,0 +1,158 @@
+{
+  "app_name": "SabaySell",
+  "tagline": "ទីផ្សារលក់ទំនិញអនឡាញកម្ពុជា",
+  "description": "ទីផ្សារលក់ទំនិញអនឡាញឥតគិតថ្លៃសម្រាប់កម្ពុជា",
+  "start_selling": "ចាប់ផ្តើមលក់",
+  "browse_listings": "រុករកទំនិញ",
+
+  "header": {
+    "search_placeholder": "ស្វែងរកអ្វីៗ...",
+    "search_button": "ស្វែងរក",
+    "sell": "លក់",
+    "notifications": "ការជូនដំណឹង",
+    "messages": "សារ",
+    "watchlist": "បញ្ជីពេញចិត្ត",
+    "login": "ចូលគណនី",
+    "profile": "ប្រវត្តិរូប",
+    "my_listings": "ទំនិញរបស់ខ្ញុំ",
+    "settings": "ការកំណត់",
+    "logout": "ចាកចេញ",
+    "create_listing": "បង្កើតទំនិញ"
+  },
+
+  "categories": {
+    "title": "ទិញតាមប្រភេទ",
+    "electronics": "គ្រឿងអេឡិចត្រូនិក",
+    "mobile_phones": "ទូរស័ព្ទដៃ",
+    "jewellery_watches": "គ្រឿងអលង្ការ និងនាឡិកា",
+    "home_garden": "ផ្ទះ និងសួន",
+    "fashion": "សម្លៀកបំពាក់",
+    "books": "សៀវភៅ",
+    "automobiles": "រថយន្ត",
+    "toys": "ប្រដាប់ប្រដាក្មេង",
+    "tools": "ឧបករណ៍",
+    "sports": "ឧបករណ៍កីឡា",
+    "school": "ឧបករណ៍សិក្សា",
+    "other": "ផ្សេងៗ",
+    "more": "ច្រើនទៀត"
+  },
+
+  "actions": {
+    "load_more": "ផ្ទុកទំនិញបន្ថែម"
+  },
+
+  "filters": {
+    "title": "តម្រង",
+    "condition": "ស្ថានភាព",
+    "price_range": "ជម្រើសតម្លៃ",
+    "format": "ទម្រង់",
+    "buying_format": "ទម្រង់ទិញ",
+    "location": "ទីតាំង",
+    "shipping": "ការដឹកជញ្ជូន",
+    "shipping_options": "ជម្រើសដឹកជញ្ជូន",
+    "new": "ថ្មី",
+    "used": "ប្រើប្រាស់",
+    "refurbished": "កែលម្អ",
+    "auction": "ដេញថ្លៃ",
+    "buy_now": "ទិញឥឡូវ",
+    "buy_it_now": "ទិញឥឡូវ",
+    "accepts_offers": "ទទួលការផ្តល់ថ្លៃ",
+    "phnom_penh": "ភ្នំពេញ",
+    "siem_reap": "សៀមរាប",
+    "sihanoukville": "ក្រុងព្រះសីហនុ",
+    "kampot": "កំពត",
+    "other_location": "ផ្សេងៗ",
+    "free_shipping": "ដឹកជញ្ជូនឥតគិតថ្លៃ",
+    "paid_shipping": "ដឹកជញ្ជូនគិតថ្លៃ",
+    "local_pickup": "ទទួលនៅមូលដ្ឋាន",
+    "min_price": "អប្បបរមា",
+    "max_price": "អតិបរមា",
+    "to": "ទៅ",
+    "apply": "អនុវត្តតម្រង",
+    "reset": "កំណត់ឡើងវិញ",
+    "clear_all": "លុបតម្រងទាំងអស់"
+  },
+
+  "products": {
+    "results": "លទ្ធផល",
+    "showing": "កំពុងបង្ហាញ",
+    "sort_by": "តម្រៀបតាម",
+    "best_match": "ផ្គូផ្គងល្អបំផុត",
+    "newest": "ថ្មីៗបំផុត",
+    "price_low_high": "តម្លៃ: ទាបទៅខ្ពស់",
+    "price_high_low": "តម្លៃ: ខ្ពស់ទៅទាប",
+    "ending_soon": "បិទដេញថ្លៃឆាប់ៗ",
+    "condition": "ស្ថានភាព",
+    "auction": "ដេញថ្លៃ",
+    "buy_now": "ទិញឥឡូវ",
+    "place_bid": "ដេញថ្លៃ",
+    "add_to_cart": "ដាក់ក្នុងកន្ត្រក",
+    "current_bid": "ការដេញថ្លៃបច្ចុប្បន្ន",
+    "time_left": "ពេលវេលានៅសល់",
+    "shipping_free": "ដឹកជញ្ជូនឥតគិតថ្លៃ",
+    "shipping_paid": "ដឹកជញ្ជូនគិតថ្លៃ",
+    "pickup_only": "ទទួលនៅមូលដ្ឋានប៉ុណ្ណោះ"
+  },
+
+  "footer": {
+    "buy": {
+      "title": "ទិញ",
+      "browse": "រុករកទាំងអស់",
+      "categories": "ប្រភេទ",
+      "saved": "ទំនិញរក្សាទុក",
+      "help": "ជំនួយដេញថ្លៃ"
+    },
+    "sell": {
+      "title": "លក់",
+      "start": "ចាប់ផ្តើមលក់",
+      "learn": "រៀនពីរបៀបលក់",
+      "seller_help": "ជំនួយអ្នកលក់",
+      "stores": "ហាង"
+    },
+    "about": {
+      "title": "អំពី",
+      "company": "ព័ត៌មានក្រុមហ៊ុន",
+      "news": "ព័ត៌មាន",
+      "careers": "ការងារ",
+      "contact": "ទាក់ទងយើង"
+    },
+    "help": {
+      "title": "ជំនួយ និងការគាំទ្រ",
+      "contact": "ទាក់ទងយើង",
+      "resolution": "មជ្ឈមណ្ឌលដោះស្រាយ",
+      "business": "អ្នកលក់ធុរកិច្ច"
+    }
+  },
+
+  "common": {
+    "loading": "កំពុងផ្ទុក...",
+    "save": "រក្សាទុក",
+    "cancel": "បោះបង់",
+    "close": "បិទ",
+    "edit": "កែប្រែ",
+    "delete": "លុប",
+    "confirm": "បញ្ជាក់",
+    "back": "ត្រឡប់",
+    "next": "បន្ទាប់",
+    "submit": "ដាក់ស្នើ",
+    "send": "ផ្ញើ",
+    "view": "មើល",
+    "share": "ចែករំលែក",
+    "report": "រាយការណ៍"
+  },
+
+  "features": {
+    "free_listings": {
+      "title": "ចុះបញ្ជីឥតគិតថ្លៃ",
+      "description": "ដាក់ទំនិញរបស់អ្នកដោយឥតគិតថ្លៃ។ គ្មានថ្លៃលាក់។"
+    },
+    "live_auctions": {
+      "title": "ការដេញថ្លៃផ្ទាល់",
+      "description": "ការដេញថ្លៃតាមពេលវេលាពិតលើទំនិញគួរឱ្យចាប់អារម្មណ៍។"
+    },
+    "safe_chat": {
+      "title": "ជជែកកថាសុវត្ថិភាព",
+      "description": "ភ្ជាប់ទំនាក់ទំនងជាមួយអ្នកទិញ និងអ្នកលក់ដោយសុវត្ថិភាព។"
+    }
+  }
+}

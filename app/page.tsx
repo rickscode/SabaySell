@@ -1,0 +1,930 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { Toaster } from "@/components/ui/sonner";
+import Logo from "@/components/Logo";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import {
+  Search,
+  ShoppingCart,
+  User,
+  Menu,
+  SlidersHorizontal,
+  Laptop,
+  Smartphone,
+  Watch,
+  Home,
+  Shirt,
+  Book,
+  Grid3x3,
+  X,
+  Plus,
+  Package,
+  DollarSign,
+  Car,
+  Gamepad2,
+  Wrench,
+  Dumbbell,
+  GraduationCap,
+  LogOut,
+  UserCircle,
+} from "lucide-react";
+import { ProductCard, Product } from "@/components/product-card";
+import { CategoryCard } from "@/components/category-card";
+import { FiltersSidebar, FilterState } from "@/components/filters-sidebar";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { ProductDetail } from "@/components/product-detail";
+import { Watchlist, WatchlistItem } from "@/components/watchlist";
+import { MessagesInbox } from "@/components/messages-inbox";
+import { ContactSellerDialog } from "@/components/contact-seller-dialog";
+import { Badge as BadgeComponent } from "@/components/ui/badge";
+import { Heart, MessageCircle } from "lucide-react";
+import { CreateListing } from "@/components/create-listing";
+import { MyListings } from "@/components/my-listings";
+import { UserProfile } from "@/components/user-profile";
+import { UserSettings } from "@/components/user-settings";
+import { NotificationsDropdown } from "@/components/notifications-dropdown";
+import { CategoryBrowse } from "@/components/category-browse";
+import { SearchResults } from "@/components/search-results";
+import { MobileNav } from "@/components/mobile-nav";
+import { RegistrationPage } from "@/components/registration-page";
+import { BiddingHelpPage } from "@/components/bidding-help-page";
+import { StartSellingPage } from "@/components/start-selling-page";
+import { ContactUsPage } from "@/components/contact-us-page";
+import { CompanyInfoPage } from "@/components/company-info-page";
+import { StoresPage } from "@/components/stores-page";
+import { LearnToSellPage } from "@/components/learn-to-sell-page";
+import { BusinessSellersPage } from "@/components/business-sellers-page";
+import { SellerHelpPage } from "@/components/seller-help-page";
+import { ResolutionCenterPage } from "@/components/resolution-center-page";
+import { NewsPage } from "@/components/news-page";
+import { CareersPage } from "@/components/careers-page";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { getCurrentUser, signOut, getUserProfile } from "@/lib/auth";
+import type { User as AuthUser } from "@supabase/supabase-js";
+import { LanguageSwitcher, LanguageSwitcherMobile } from "@/components/LanguageSwitcher";
+import { useTranslation } from "react-i18next";
+import { getListings } from "@/lib/queries/listings";
+import type { ListingWithImages } from "@/lib/database.types";
+
+const categories = [
+  { nameKey: "categories.electronics", icon: Laptop, count: "12.5K items" },
+  { nameKey: "categories.mobile_phones", icon: Smartphone, count: "8.2K items" },
+  { nameKey: "categories.jewellery_watches", icon: Watch, count: "4.3K items" },
+  { nameKey: "categories.home_garden", icon: Home, count: "9.8K items" },
+  { nameKey: "categories.fashion", icon: Shirt, count: "15.2K items" },
+  { nameKey: "categories.books", icon: Book, count: "6.7K items" },
+  { nameKey: "categories.automobiles", icon: Car, count: "3.4K items" },
+  { nameKey: "categories.toys", icon: Gamepad2, count: "7.1K items" },
+  { nameKey: "categories.tools", icon: Wrench, count: "5.8K items" },
+  { nameKey: "categories.sports", icon: Dumbbell, count: "4.9K items" },
+  { nameKey: "categories.school", icon: GraduationCap, count: "3.2K items" },
+  { nameKey: "categories.other", icon: Grid3x3, count: "8.3K items" },
+];
+
+// Helper function to convert database listing to Product format
+function convertListingToProduct(listing: any): Product {
+  const primaryImage = (listing.images as any[])?.find((img: any) => img.is_primary) || (listing.images as any[])?.[0];
+
+  return {
+    id: listing.id,
+    title: listing.title_en || "Untitled",
+    price: listing.price || 0,
+    image: primaryImage?.url || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Crect width='400' height='400' fill='%23e5e7eb'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='24' fill='%239ca3af'%3ENo Image%3C/text%3E%3C/svg%3E",
+    condition: listing.condition ? listing.condition.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) : "New",
+    shipping: "Free shipping", // TODO: Add shipping info to listing
+    location: listing.location || "Cambodia",
+    buyNow: listing.type === 'fixed',
+    auction: listing.type === 'auction',
+    active_boost: listing.active_boost || null,
+  };
+}
+
+type View = 
+  | "home" 
+  | "product" 
+  | "watchlist" 
+  | "messages" 
+  | "create-listing" 
+  | "my-listings" 
+  | "profile" 
+  | "settings"
+  | "category-browse"
+  | "search-results"
+  | "registration"
+  | "bidding-help"
+  | "start-selling"
+  | "contact"
+  | "company-info"
+  | "stores"
+  | "learn-to-sell"
+  | "business-sellers"
+  | "seller-help"
+  | "resolution"
+  | "news"
+  | "careers";
+
+export default function App() {
+  const router = useRouter();
+  const { t } = useTranslation();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [currentView, setCurrentView] = useState<View>("home");
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const [watchlistItems, setWatchlistItems] = useState<WatchlistItem[]>([]);
+  const [contactDialogOpen, setContactDialogOpen] = useState(false);
+  const [productToContact, setProductToContact] = useState<Product | null>(null);
+  const [contactInitialMessage, setContactInitialMessage] = useState<string>("");
+  const [contactStartInOfferMode, setContactStartInOfferMode] = useState<boolean>(false);
+  const [editingListing, setEditingListing] = useState<any>(null);
+
+  // Auth state
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [userProfile, setUserProfile] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  // Products state
+  const [products, setProducts] = useState<Product[]>([]);
+  const [productsLoading, setProductsLoading] = useState(true);
+
+  // Filter state
+  const [filters, setFilters] = useState<FilterState>({
+    conditions: [],
+    priceMin: 0,
+    priceMax: 50000,
+    types: [],
+    locations: [],
+    shippingFree: false,
+    shippingPaid: false,
+    localPickup: false,
+  });
+
+  // Load user on mount
+  useEffect(() => {
+    async function loadUser() {
+      try {
+        const { user: currentUser } = await getCurrentUser();
+        setUser(currentUser);
+
+        if (currentUser) {
+          const { data: profile } = await getUserProfile(currentUser.id);
+          setUserProfile(profile);
+        }
+      } catch (error) {
+        console.error('Error loading user:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadUser();
+  }, []);
+
+  // Load listings on mount and when filters or search query change
+  useEffect(() => {
+    async function loadListings() {
+      setProductsLoading(true);
+      try {
+        // Build filter object for query
+        const queryFilters: any = {};
+
+        // Add search query if present
+        if (searchQuery.trim()) {
+          queryFilters.search = searchQuery.trim();
+        }
+
+        if (filters.conditions.length > 0) {
+          queryFilters.condition = filters.conditions;
+        }
+
+        if (filters.priceMin > 0) {
+          queryFilters.priceMin = filters.priceMin;
+        }
+
+        if (filters.priceMax < 50000) {
+          queryFilters.priceMax = filters.priceMax;
+        }
+
+        if (filters.types.length > 0) {
+          // If both types selected, don't filter. If only one, filter
+          if (filters.types.length === 1) {
+            queryFilters.type = filters.types[0];
+          }
+        }
+
+        if (filters.locations.length > 0) {
+          // For multiple locations, we'll need to filter in memory since Supabase doesn't support OR on same column easily
+          // For now, just use first location
+          queryFilters.location = filters.locations[0];
+        }
+
+        if (filters.shippingFree) {
+          queryFilters.shipping_free = true;
+        }
+
+        if (filters.shippingPaid) {
+          queryFilters.shipping_paid = true;
+        }
+
+        if (filters.localPickup) {
+          queryFilters.local_pickup = true;
+        }
+
+        const { data: listings } = await getListings(queryFilters, { sortBy: 'newest', limit: 50 });
+
+        // If multiple locations selected, filter in memory
+        let filteredListings = listings;
+        if (filters.locations.length > 1) {
+          filteredListings = listings.filter(listing =>
+            filters.locations.includes(listing.location || '')
+          );
+        }
+
+        const convertedProducts = filteredListings.map(convertListingToProduct);
+        setProducts(convertedProducts);
+      } catch (error) {
+        console.error('Error loading listings:', error);
+      } finally {
+        setProductsLoading(false);
+      }
+    }
+
+    loadListings();
+  }, [filters, searchQuery]);
+
+  // Logout handler
+  const handleLogout = async () => {
+    await signOut();
+    setUser(null);
+    setUserProfile(null);
+    router.refresh();
+  };
+
+  // Watchlist management
+  const addToWatchlist = (product: Product) => {
+    setWatchlistItems((prev) => {
+      const existing = prev.find((item) => item.product.id === product.id);
+      if (existing) {
+        toast.info("Already in watchlist");
+        return prev;
+      }
+      toast.success("Added to watchlist", {
+        description: `${product.title} has been saved`,
+      });
+      return [...prev, { product, savedAt: new Date() }];
+    });
+  };
+
+  const removeFromWatchlist = (productId: string) => {
+    setWatchlistItems((prev) => prev.filter((item) => item.product.id !== productId));
+    toast.success("Removed from watchlist");
+  };
+
+  const handleProductClick = (product: Product) => {
+    setSelectedProduct(product);
+    setCurrentView("product");
+  };
+
+  const handleBackToHome = () => {
+    setCurrentView("home");
+    setSelectedProduct(null);
+  };
+
+  const handleContactSeller = (product: Product, initialMessage?: string, startInOfferMode?: boolean) => {
+    setProductToContact(product);
+    setContactInitialMessage(initialMessage || "");
+    setContactStartInOfferMode(startInOfferMode || false);
+    setContactDialogOpen(true);
+  };
+
+  const handleSendMessage = (message: string, offer?: number) => {
+    toast.success("Message sent!", {
+      description: offer 
+        ? `Your offer of ${offer.toFixed(2)} has been sent to the seller`
+        : "The seller will respond soon",
+    });
+    // In real app, send to backend
+    setCurrentView("messages");
+  };
+
+  const handleCategoryClick = (categoryName: string) => {
+    router.push(`/category/${encodeURIComponent(categoryName)}`);
+  };
+
+  // Search is now handled by filters effect
+  const handleSearch = () => {
+    // Search is applied via useEffect when searchQuery changes
+    // Just ensure we're on home view
+    if (currentView !== "home") {
+      setCurrentView("home");
+    }
+  };
+
+  const handleSearchKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      handleSearch();
+    }
+  };
+
+  const handleCreateListing = () => {
+    router.push('/listings/new');
+  };
+
+  const handlePublishListing = (listing: any) => {
+    // In real app, save to backend
+    console.log("Publishing listing:", listing);
+    router.push('/my-listings');
+  };
+
+  const handleEditListing = (listing: any) => {
+    // Navigate to edit page with listing ID
+    router.push(`/listings/${listing.id}/edit`);
+  };
+
+  const handleViewListing = (listing: any) => {
+    // Convert Listing to Product type by adding missing properties
+    const product: Product = {
+      ...listing,
+      condition: "Used" as const,
+      shipping: "Free shipping",
+      location: "Phnom Penh",
+      auction: listing.type === "auction",
+    };
+    handleProductClick(product);
+  };
+
+  // Render different views
+  if (currentView === "product" && selectedProduct) {
+    return (
+      <>
+        <ProductDetail
+          product={selectedProduct}
+          onBack={handleBackToHome}
+          similarProducts={products.filter((p) => p.id !== selectedProduct.id)}
+          onContactSeller={handleContactSeller}
+          onSaveToWatchlist={addToWatchlist}
+        />
+        {productToContact && (
+          <ContactSellerDialog
+            open={contactDialogOpen}
+            onOpenChange={setContactDialogOpen}
+            product={productToContact}
+            onSendMessage={handleSendMessage}
+            initialMessage={contactInitialMessage}
+            startInOfferMode={contactStartInOfferMode}
+          />
+        )}
+      </>
+    );
+  }
+
+  if (currentView === "watchlist") {
+    return (
+      <>
+        <Watchlist
+          items={watchlistItems}
+          onRemoveItem={removeFromWatchlist}
+          onViewProduct={handleProductClick}
+          onContactSeller={handleContactSeller}
+          onContinueBrowsing={handleBackToHome}
+        />
+        {productToContact && (
+          <ContactSellerDialog
+            open={contactDialogOpen}
+            onOpenChange={setContactDialogOpen}
+            product={productToContact}
+            onSendMessage={handleSendMessage}
+            initialMessage={contactInitialMessage}
+            startInOfferMode={contactStartInOfferMode}
+          />
+        )}
+      </>
+    );
+  }
+
+  if (currentView === "messages") {
+    return <MessagesInbox onBack={handleBackToHome} />;
+  }
+
+  if (currentView === "create-listing") {
+    return (
+      <CreateListing
+        onBack={handleBackToHome}
+        onPublish={handlePublishListing}
+        editingListing={editingListing}
+      />
+    );
+  }
+
+  if (currentView === "my-listings") {
+    return (
+      <MyListings
+        onBack={handleBackToHome}
+        onCreateNew={handleCreateListing}
+        onEditListing={handleEditListing}
+        onViewListing={handleViewListing}
+      />
+    );
+  }
+
+  if (currentView === "profile") {
+    return (
+      <UserProfile
+        onBack={handleBackToHome}
+        onSettings={() => setCurrentView("settings")}
+        onEditProfile={() => setCurrentView("settings")}
+        onProductClick={handleProductClick}
+        isOwnProfile={true}
+      />
+    );
+  }
+
+  if (currentView === "settings") {
+    return <UserSettings onBack={handleBackToHome} />;
+  }
+
+  if (currentView === "category-browse") {
+    return (
+      <CategoryBrowse
+        category={selectedCategory}
+        onBack={handleBackToHome}
+        onProductClick={handleProductClick}
+        products={products}
+        onSaveToWatchlist={addToWatchlist}
+        onBuyNow={handleProductClick}
+        onMakeOffer={handleProductClick}
+      />
+    );
+  }
+
+  if (currentView === "search-results") {
+    return (
+      <SearchResults
+        searchQuery={searchQuery}
+        onBack={handleBackToHome}
+        onProductClick={handleProductClick}
+        onSearchChange={setSearchQuery}
+        products={products}
+        onSaveToWatchlist={addToWatchlist}
+        onBuyNow={handleProductClick}
+        onMakeOffer={handleProductClick}
+      />
+    );
+  }
+
+  if (currentView === "registration") {
+    return <RegistrationPage onNavigate={(view) => setCurrentView(view as View)} />;
+  }
+
+  if (currentView === "bidding-help") {
+    return <BiddingHelpPage onNavigate={(view) => setCurrentView(view as View)} />;
+  }
+
+  if (currentView === "start-selling") {
+    return <StartSellingPage onNavigate={(view) => setCurrentView(view as View)} onCreateListing={handleCreateListing} />;
+  }
+
+  if (currentView === "contact") {
+    return <ContactUsPage onNavigate={(view) => setCurrentView(view as View)} />;
+  }
+
+  if (currentView === "company-info") {
+    return <CompanyInfoPage onNavigate={(view) => setCurrentView(view as View)} />;
+  }
+
+  if (currentView === "stores") {
+    return <StoresPage onNavigate={(view) => setCurrentView(view as View)} />;
+  }
+
+  if (currentView === "learn-to-sell") {
+    return <LearnToSellPage onNavigate={(view) => setCurrentView(view as View)} />;
+  }
+
+  if (currentView === "business-sellers") {
+    return <BusinessSellersPage onNavigate={(view) => setCurrentView(view as View)} />;
+  }
+
+  if (currentView === "seller-help") {
+    return <SellerHelpPage onNavigate={(view) => setCurrentView(view as View)} />;
+  }
+
+  if (currentView === "resolution") {
+    return <ResolutionCenterPage onNavigate={(view) => setCurrentView(view as View)} />;
+  }
+
+  if (currentView === "news") {
+    return <NewsPage onNavigate={(view) => setCurrentView(view as View)} />;
+  }
+
+  if (currentView === "careers") {
+    return <CareersPage onNavigate={(view) => setCurrentView(view as View)} />;
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50 pb-20 sm:pb-0">
+      {/* Header */}
+      <header className="bg-white border-b sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 py-3">
+          <div className="flex items-center gap-4">
+            {/* Logo */}
+            <div
+              className="flex items-center cursor-pointer"
+              onClick={handleBackToHome}
+            >
+              <Logo width={120} height={35} />
+            </div>
+
+            {/* Search Bar */}
+            <div className="flex-1 flex gap-2">
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Input
+                  type="text"
+                  placeholder={t('header.search_placeholder')}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyPress={handleSearchKeyPress}
+                  className="pl-10"
+                  suppressHydrationWarning
+                />
+              </div>
+              <Button
+                className="hidden sm:flex bg-[#fa6723] hover:bg-[#e55a1f]"
+                onClick={handleSearch}
+                suppressHydrationWarning
+              >
+                {t('header.search_button')}
+              </Button>
+            </div>
+
+            {/* User Actions */}
+            <div className="flex items-center gap-2">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={handleCreateListing}
+                title="Sell"
+                className="hidden sm:flex"
+              >
+                <DollarSign className="w-5 h-5" />
+              </Button>
+              
+              <NotificationsDropdown />
+              
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="relative"
+                onClick={() => setCurrentView("messages")}
+                title="Messages"
+              >
+                <MessageCircle className="w-5 h-5" />
+                <BadgeComponent className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-[#fa6723]">
+                  3
+                </BadgeComponent>
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="relative"
+                onClick={() => setCurrentView("watchlist")}
+                title="Watchlist"
+              >
+                <Heart className="w-5 h-5" />
+                {watchlistItems.length > 0 && (
+                  <BadgeComponent className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-red-500">
+                    {watchlistItems.length}
+                  </BadgeComponent>
+                )}
+              </Button>
+
+              {/* Language Switcher */}
+              <LanguageSwitcher />
+              <LanguageSwitcherMobile />
+
+              {/* User Menu Dropdown - Auth-aware */}
+              {loading ? (
+                <Button variant="ghost" size="icon" className="hidden sm:flex" disabled>
+                  <User className="w-5 h-5" />
+                </Button>
+              ) : user ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="hidden sm:flex">
+                      <Avatar className="w-8 h-8">
+                        <AvatarImage src={userProfile?.avatar_url} alt={userProfile?.display_name || user.email} />
+                        <AvatarFallback>
+                          {userProfile?.display_name?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase() || 'U'}
+                        </AvatarFallback>
+                      </Avatar>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56 bg-white">
+                    <DropdownMenuLabel>
+                      <div className="flex flex-col space-y-1">
+                        <p className="text-sm font-medium leading-none">{userProfile?.display_name || 'User'}</p>
+                        <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
+                      </div>
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => router.push(`/users/${userProfile?.username || user.email?.split('@')[0] || 'profile'}`)}>
+                      <UserCircle className="mr-2 h-4 w-4" />
+                      <span>{t('header.profile')}</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => router.push('/my-listings')}>
+                      <Package className="mr-2 h-4 w-4" />
+                      <span>{t('header.my_listings')}</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => router.push('/messages')}>
+                      <MessageCircle className="mr-2 h-4 w-4" />
+                      <span>{t('header.messages')}</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleCreateListing}>
+                      <Plus className="mr-2 h-4 w-4" />
+                      <span>{t('header.create_listing')}</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => router.push('/settings')}>
+                      <span>{t('header.settings')}</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleLogout}>
+                      <LogOut className="mr-2 h-4 w-4" />
+                      <span>{t('header.logout')}</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="hidden sm:flex"
+                  onClick={() => router.push('/auth/login')}
+                >
+                  <User className="w-5 h-5" />
+                </Button>
+              )}
+            </div>
+          </div>
+
+          {/* Categories Navigation - Mobile */}
+          <div className="mt-3 flex gap-2 overflow-x-auto pb-2 sm:hidden scrollbar-hide">
+            {categories.slice(0, 4).map((category) => (
+              <Button
+                key={category.nameKey}
+                variant="outline"
+                size="sm"
+                className="whitespace-nowrap"
+                onClick={() => handleCategoryClick(t(category.nameKey))}
+              >
+                {t(category.nameKey)}
+              </Button>
+            ))}
+            <Button variant="outline" size="sm" className="whitespace-nowrap">
+              <Grid3x3 className="w-4 h-4 mr-1" />
+              {t('categories.more')}
+            </Button>
+          </div>
+        </div>
+      </header>
+
+      {/* Categories Section - Desktop */}
+      <section className="hidden sm:block bg-white border-b">
+        <div className="max-w-7xl mx-auto px-4 py-6">
+          <h2 className="mb-4">{t('categories.title')}</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+            {categories.map((category) => (
+              <div key={category.nameKey} onClick={() => handleCategoryClick(t(category.nameKey))}>
+                <CategoryCard
+                  nameKey={category.nameKey}
+                  icon={category.icon}
+                  count={category.count}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-4 py-6">
+        {/* Filters and Sort Bar */}
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-2">
+            {/* Mobile Filter Button */}
+            <Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
+              <SheetTrigger asChild>
+                <Button variant="outline" className="lg:hidden">
+                  <SlidersHorizontal className="w-4 h-4 mr-2" />
+                  {t('filters.title')}
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-80 p-0">
+                <FiltersSidebar
+                  onClose={() => setIsFilterOpen(false)}
+                  isMobile
+                  onFiltersChange={setFilters}
+                  initialFilters={filters}
+                />
+              </SheetContent>
+            </Sheet>
+
+            <span className="text-sm text-gray-600">
+              <span className="hidden sm:inline">{t('products.showing')} </span>
+              {products.length} {t('products.results')}
+            </span>
+          </div>
+
+          <Select defaultValue="best-match">
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder={t('products.sort_by')} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="best-match">{t('products.best_match')}</SelectItem>
+              <SelectItem value="price-low">{t('products.price_low_high')}</SelectItem>
+              <SelectItem value="price-high">{t('products.price_high_low')}</SelectItem>
+              <SelectItem value="newest">{t('products.newest')}</SelectItem>
+              <SelectItem value="ending">{t('products.ending_soon')}</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="flex gap-6">
+          {/* Filters Sidebar - Desktop */}
+          <aside className="hidden lg:block w-64 shrink-0">
+            <FiltersSidebar onFiltersChange={setFilters} initialFilters={filters} />
+          </aside>
+
+          {/* Product Grid */}
+          <div className="flex-1">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {products.map((product) => (
+                <div key={product.id} onClick={() => handleProductClick(product)}>
+                  <ProductCard 
+                    product={product}
+                    onSaveToWatchlist={addToWatchlist}
+                    onBuyNow={handleProductClick}
+                    onMakeOffer={handleProductClick}
+                  />
+                </div>
+              ))}
+            </div>
+
+            {/* Load More */}
+            <div className="mt-8 text-center">
+              <Button variant="outline" size="lg">
+                {t('actions.load_more')}
+              </Button>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      {/* Footer */}
+      <footer className="bg-white border-t mt-12">
+        <div className="max-w-7xl mx-auto px-4 py-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            <div>
+              <h3 className="mb-3">{t('footer.buy.title')}</h3>
+              <ul className="space-y-2 text-sm text-gray-600">
+                <li
+                  className="hover:text-[#fa6723] cursor-pointer"
+                  onClick={() => setCurrentView("registration")}
+                >
+                  {t('footer.buy.browse')}
+                </li>
+                <li
+                  className="hover:text-[#fa6723] cursor-pointer"
+                  onClick={() => setCurrentView("bidding-help")}
+                >
+                  {t('footer.buy.help')}
+                </li>
+                <li
+                  className="hover:text-[#fa6723] cursor-pointer"
+                  onClick={() => setCurrentView("stores")}
+                >
+                  {t('footer.sell.stores')}
+                </li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="mb-3">{t('footer.sell.title')}</h3>
+              <ul className="space-y-2 text-sm text-gray-600">
+                <li
+                  className="hover:text-[#fa6723] cursor-pointer"
+                  onClick={() => setCurrentView("start-selling")}
+                >
+                  {t('footer.sell.start')}
+                </li>
+                <li
+                  className="hover:text-[#fa6723] cursor-pointer"
+                  onClick={() => setCurrentView("learn-to-sell")}
+                >
+                  {t('footer.sell.learn')}
+                </li>
+                <li
+                  className="hover:text-[#fa6723] cursor-pointer"
+                  onClick={() => setCurrentView("business-sellers")}
+                >
+                  {t('footer.help.business')}
+                </li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="mb-3">{t('footer.about.title')}</h3>
+              <ul className="space-y-2 text-sm text-gray-600">
+                <li
+                  className="hover:text-[#fa6723] cursor-pointer"
+                  onClick={() => setCurrentView("company-info")}
+                >
+                  {t('footer.about.company')}
+                </li>
+                <li
+                  className="hover:text-[#fa6723] cursor-pointer"
+                  onClick={() => setCurrentView("news")}
+                >
+                  {t('footer.about.news')}
+                </li>
+                <li
+                  className="hover:text-[#fa6723] cursor-pointer"
+                  onClick={() => setCurrentView("careers")}
+                >
+                  {t('footer.about.careers')}
+                </li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="mb-3">{t('footer.help.title')}</h3>
+              <ul className="space-y-2 text-sm text-gray-600">
+                <li
+                  className="hover:text-[#fa6723] cursor-pointer"
+                  onClick={() => setCurrentView("seller-help")}
+                >
+                  {t('footer.sell.seller_help')}
+                </li>
+                <li
+                  className="hover:text-[#fa6723] cursor-pointer"
+                  onClick={() => setCurrentView("contact")}
+                >
+                  {t('footer.help.contact')}
+                </li>
+                <li
+                  className="hover:text-[#fa6723] cursor-pointer"
+                  onClick={() => setCurrentView("resolution")}
+                >
+                  {t('footer.help.resolution')}
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div className="mt-8 pt-8 border-t text-center text-sm text-gray-600">
+            © 2025 SabaySell. All rights reserved.
+          </div>
+        </div>
+      </footer>
+      
+      {/* Mobile Navigation */}
+      <MobileNav
+        currentView={currentView}
+        watchlistCount={watchlistItems.length}
+        onNavigate={(view) => {
+          if (view === "search") {
+            setCurrentView("search-results");
+          } else {
+            setCurrentView(view as View);
+          }
+        }}
+      />
+      
+      <Toaster />
+      {productToContact && (
+        <ContactSellerDialog
+          open={contactDialogOpen}
+          onOpenChange={setContactDialogOpen}
+          product={productToContact}
+          onSendMessage={handleSendMessage}
+        />
+      )}
+    </div>
+  );
+}
