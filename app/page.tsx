@@ -44,7 +44,7 @@ import { ProductCard, Product } from "@/components/product-card";
 import { CategoryCard } from "@/components/category-card";
 import { FiltersSidebar, FilterState } from "@/components/filters-sidebar";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { ProductDetail } from "@/components/product-detail";
+// ProductDetail now accessed via /listings/[id] route
 import { Watchlist, WatchlistItem } from "@/components/watchlist";
 import { MessagesInbox } from "@/components/messages-inbox";
 import { ContactSellerDialog } from "@/components/contact-seller-dialog";
@@ -149,7 +149,6 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [currentView, setCurrentView] = useState<View>("home");
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [watchlistItems, setWatchlistItems] = useState<WatchlistItem[]>([]);
   const [contactDialogOpen, setContactDialogOpen] = useState(false);
@@ -301,13 +300,11 @@ export default function App() {
   };
 
   const handleProductClick = (product: Product) => {
-    setSelectedProduct(product);
-    setCurrentView("product");
+    router.push(`/listings/${product.id}`);
   };
 
   const handleBackToHome = () => {
     setCurrentView("home");
-    setSelectedProduct(null);
   };
 
   const handleContactSeller = (product: Product, initialMessage?: string, startInOfferMode?: boolean) => {
@@ -374,29 +371,7 @@ export default function App() {
   };
 
   // Render different views
-  if (currentView === "product" && selectedProduct) {
-    return (
-      <>
-        <ProductDetail
-          product={selectedProduct}
-          onBack={handleBackToHome}
-          similarProducts={products.filter((p) => p.id !== selectedProduct.id)}
-          onContactSeller={handleContactSeller}
-          onSaveToWatchlist={addToWatchlist}
-        />
-        {productToContact && (
-          <ContactSellerDialog
-            open={contactDialogOpen}
-            onOpenChange={setContactDialogOpen}
-            product={productToContact}
-            onSendMessage={handleSendMessage}
-            initialMessage={contactInitialMessage}
-            startInOfferMode={contactStartInOfferMode}
-          />
-        )}
-      </>
-    );
-  }
+  // ProductDetail now handled by /listings/[id] route
 
   if (currentView === "watchlist") {
     return (

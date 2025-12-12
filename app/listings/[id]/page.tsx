@@ -70,6 +70,17 @@ export default function ListingDetailPage({ params }: { params: Promise<{ id: st
     shipping: "Contact seller",
   };
 
+  // Build auctionData prop if this is an auction
+  const auctionData = listing.type === "auction" && listing.auction ? {
+    id: listing.auction.id,
+    currentPrice: parseFloat(listing.auction.current_price || listing.auction.start_price),
+    minIncrement: parseFloat(listing.auction.min_increment || "1.00"),
+    totalBids: listing.auction.total_bids || 0,
+    endsAt: listing.auction.ends_at,
+    status: listing.auction.status,
+    leadingBidderId: listing.auction.leading_bidder_id,
+  } : undefined;
+
   return (
     <ProductDetail
       product={product}
@@ -77,6 +88,8 @@ export default function ListingDetailPage({ params }: { params: Promise<{ id: st
       similarProducts={[]}
       onSaveToWatchlist={() => {}}
       onContactSeller={() => {}}
+      auctionData={auctionData}
+      currentUserId={listing.user_id}
     />
   );
 }

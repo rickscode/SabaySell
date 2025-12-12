@@ -118,17 +118,24 @@ export async function createListing(
 
     // If auction type, create auction record
     if (data.type === 'auction' && data.start_price) {
+      const now = new Date()
+      const startsAt = now.toISOString()
+      const endsAt = new Date(
+        Date.now() + (data.auction_duration_hours || 168) * 60 * 60 * 1000
+      ).toISOString()
+
+      // Set status to 'active' if auction starts immediately, otherwise 'upcoming'
+      const auctionStatus = 'active' // Auctions start immediately by default
+
       const auctionData: AuctionInsert = {
         listing_id: (listing as any).id,
-        status: 'upcoming',
+        status: auctionStatus,
         start_price: data.start_price,
         current_price: data.start_price,
         min_increment: data.min_increment || 1.00,
         reserve_price: data.reserve_price || null,
-        starts_at: new Date().toISOString(),
-        ends_at: new Date(
-          Date.now() + (data.auction_duration_hours || 168) * 60 * 60 * 1000
-        ).toISOString()
+        starts_at: startsAt,
+        ends_at: endsAt
       }
 
       const { error: auctionError } = await supabase
