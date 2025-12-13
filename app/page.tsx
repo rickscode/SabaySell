@@ -105,18 +105,51 @@ const categories = [
 function convertListingToProduct(listing: any): Product {
   const primaryImage = (listing.images as any[])?.find((img: any) => img.is_primary) || (listing.images as any[])?.[0];
 
+  // For auction listings, use current_price from auction table
+  const price = listing.type === 'auction' && listing.auction
+    ? parseFloat(listing.auction.current_price || listing.auction.start_price || '0')
+    : (listing.price || 0);
+
+  // For auction listings, include bid count and time left
+  const bids = listing.type === 'auction' && listing.auction
+    ? listing.auction.total_bids
+    : undefined;
+
+  const timeLeft = listing.type === 'auction' && listing.auction?.ends_at
+    ? calculateTimeLeft(listing.auction.ends_at)
+    : undefined;
+
   return {
     id: listing.id,
     title: listing.title_en || "Untitled",
-    price: listing.price || 0,
+    price,
     image: primaryImage?.url || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Crect width='400' height='400' fill='%23e5e7eb'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='24' fill='%239ca3af'%3ENo Image%3C/text%3E%3C/svg%3E",
     condition: listing.condition ? listing.condition.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) : "New",
     shipping: "Free shipping", // TODO: Add shipping info to listing
     location: listing.location || "Cambodia",
     buyNow: listing.type === 'fixed',
     auction: listing.type === 'auction',
+    bids,
+    timeLeft,
     active_boost: listing.active_boost || null,
   };
+}
+
+// Helper function to calculate time left for auctions
+function calculateTimeLeft(endsAt: string): string {
+  const now = new Date();
+  const end = new Date(endsAt);
+  const diffMs = end.getTime() - now.getTime();
+
+  if (diffMs <= 0) return 'Ended';
+
+  const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+
+  if (days > 0) return `${days}d ${hours}h`;
+  if (hours > 0) return `${hours}h ${minutes}m`;
+  return `${minutes}m`;
 }
 
 type View = 

@@ -69,6 +69,18 @@ export async function getListings(
         type,
         ends_at,
         status
+      ),
+      auction:auctions (
+        id,
+        status,
+        start_price,
+        current_price,
+        min_increment,
+        reserve_price,
+        total_bids,
+        leading_bidder_id,
+        starts_at,
+        ends_at
       )
     `, { count: 'exact' })
 
