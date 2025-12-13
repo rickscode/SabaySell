@@ -18,6 +18,7 @@ export interface Product {
   timeLeft?: string;
   buyNow?: boolean;
   auction?: boolean;
+  isFavorited?: boolean;
   active_boost?: {
     id: string;
     type: 'featured' | 'top_category';
@@ -30,9 +31,10 @@ interface ProductCardProps {
   onSaveToWatchlist?: (product: Product) => void;
   onBuyNow?: (product: Product) => void;
   onMakeOffer?: (product: Product) => void;
+  isLoading?: boolean;
 }
 
-export function ProductCard({ product, onSaveToWatchlist, onBuyNow, onMakeOffer }: ProductCardProps) {
+export function ProductCard({ product, onSaveToWatchlist, onBuyNow, onMakeOffer, isLoading }: ProductCardProps) {
   const discount = product.originalPrice
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
     : 0;
@@ -46,13 +48,16 @@ export function ProductCard({ product, onSaveToWatchlist, onBuyNow, onMakeOffer 
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
         />
         <button
-          className="absolute top-2 right-2 p-2 bg-white rounded-full shadow-md hover:bg-gray-100 transition-colors"
+          className="absolute top-2 right-2 p-2 bg-white rounded-full shadow-md hover:bg-gray-100 transition-colors disabled:opacity-50"
           onClick={(e) => {
             e.stopPropagation();
             onSaveToWatchlist?.(product);
           }}
+          disabled={isLoading}
         >
-          <Heart className="w-4 h-4" />
+          <Heart
+            className={`w-4 h-4 ${product.isFavorited ? 'fill-red-500 text-red-500' : ''}`}
+          />
         </button>
 
         {/* Boost badges - prominently displayed */}

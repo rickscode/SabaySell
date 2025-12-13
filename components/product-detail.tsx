@@ -356,16 +356,6 @@ export function ProductDetail({ product, onBack, similarProducts, onContactSelle
                     variant="outline"
                     className="w-full"
                     size="lg"
-                    onClick={() => onSaveToWatchlist(product)}
-                  >
-                    <Heart className="w-4 h-4 mr-2" />
-                    Watch Auction
-                  </Button>
-
-                  <Button
-                    variant="outline"
-                    className="w-full"
-                    size="lg"
                     onClick={() => onContactSeller(product)}
                   >
                     <MessageSquare className="w-4 h-4 mr-2" />
@@ -403,13 +393,13 @@ export function ProductDetail({ product, onBack, similarProducts, onContactSelle
               )}
 
               <div className="flex gap-2">
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   className="flex-1"
                   onClick={() => onSaveToWatchlist(product)}
                 >
-                  <Heart className="w-4 h-4 mr-2" />
-                  Save to Watchlist
+                  <Heart className={`w-4 h-4 mr-2 ${product.isFavorited ? 'fill-red-500 text-red-500' : ''}`} />
+                  {product.isFavorited ? 'Saved' : 'Save to Watchlist'}
                 </Button>
                 <Button variant="outline" size="icon">
                   <Share2 className="w-4 h-4" />

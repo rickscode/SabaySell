@@ -525,6 +525,26 @@ export interface Database {
           updated_at?: string
         }
       }
+      favorites: {
+        Row: {
+          id: string
+          user_id: string
+          listing_id: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          listing_id: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          listing_id?: string
+          created_at?: string
+        }
+      }
     }
     Views: {
       [_ in never]: never
@@ -568,6 +588,7 @@ export type Message = Database['public']['Tables']['messages']['Row']
 export type Boost = Database['public']['Tables']['boosts']['Row']
 export type Transaction = Database['public']['Tables']['transactions']['Row']
 export type Report = Database['public']['Tables']['reports']['Row']
+export type Favorite = Database['public']['Tables']['favorites']['Row']
 
 // Insert types
 export type UserInsert = Database['public']['Tables']['users']['Insert']
@@ -580,6 +601,7 @@ export type MessageInsert = Database['public']['Tables']['messages']['Insert']
 export type BoostInsert = Database['public']['Tables']['boosts']['Insert']
 export type TransactionInsert = Database['public']['Tables']['transactions']['Insert']
 export type ReportInsert = Database['public']['Tables']['reports']['Insert']
+export type FavoriteInsert = Database['public']['Tables']['favorites']['Insert']
 
 // Update types
 export type UserUpdate = Database['public']['Tables']['users']['Update']
@@ -592,6 +614,7 @@ export type MessageUpdate = Database['public']['Tables']['messages']['Update']
 export type BoostUpdate = Database['public']['Tables']['boosts']['Update']
 export type TransactionUpdate = Database['public']['Tables']['transactions']['Update']
 export type ReportUpdate = Database['public']['Tables']['reports']['Update']
+export type FavoriteUpdate = Database['public']['Tables']['favorites']['Update']
 
 // Extended types with relations (for queries)
 export type ListingWithImages = Listing & {
@@ -635,4 +658,8 @@ export type ThreadWithMessages = Thread & {
 
 export type MessageWithSender = Message & {
   sender: User
+}
+
+export type FavoriteWithListing = Favorite & {
+  listing: ListingWithImages
 }

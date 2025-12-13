@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import {
   Dialog,
   DialogContent,
@@ -15,12 +16,13 @@ import { Input } from "./ui/input";
 import { Phone, MessageCircle, Send } from "lucide-react";
 import { Product } from "./product-card";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
+import { createThreadAndSendMessage } from "@/app/actions/messages";
+import { toast } from "sonner";
 
 interface ContactSellerDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   product: Product;
-  onSendMessage: (message: string, offer?: number) => void;
   initialMessage?: string;
   startInOfferMode?: boolean;
 }
@@ -29,13 +31,14 @@ export function ContactSellerDialog({
   open,
   onOpenChange,
   product,
-  onSendMessage,
   initialMessage = "",
   startInOfferMode = false,
 }: ContactSellerDialogProps) {
+  const router = useRouter();
   const [message, setMessage] = useState(initialMessage);
   const [offerAmount, setOfferAmount] = useState("");
   const [isOfferMode, setIsOfferMode] = useState(startInOfferMode);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Update message and offer mode when dialog opens
   useEffect(() => {
@@ -45,13 +48,30 @@ export function ContactSellerDialog({
     }
   }, [open, initialMessage, startInOfferMode]);
 
-  const handleSend = () => {
-    if (message.trim()) {
-      onSendMessage(message, isOfferMode ? parseFloat(offerAmount) : undefined);
-      setMessage("");
-      setOfferAmount("");
-      setIsOfferMode(false);
-      onOpenChange(false);
+  const handleSend = async () => {
+    if (!message.trim()) return;
+
+    setIsLoading(true);
+
+    try {
+      const offer = isOfferMode && offerAmount ? parseFloat(offerAmount) : undefined;
+      const result = await createThreadAndSendMessage(product.id, message, offer);
+
+      if (result.success) {
+        toast.success("Message sent!");
+        setMessage("");
+        setOfferAmount("");
+        setIsOfferMode(false);
+        onOpenChange(false);
+        router.push(`/messages?thread=${result.threadId}`);
+      } else {
+        toast.error(result.error || "Failed to send message");
+      }
+    } catch (error) {
+      console.error("Error sending message:", error);
+      toast.error("Unexpected error occurred");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -173,13 +193,21 @@ export function ContactSellerDialog({
           <div className="flex gap-2">
             <Button
               onClick={handleSend}
-              disabled={!message.trim()}
+              disabled={!message.trim() || isLoading}
               className="flex-1 bg-[#fa6723] hover:bg-[#e55a1f]"
             >
               <Send className="w-4 h-4 mr-2" />
-              {isOfferMode ? "Send Offer" : "Send Message"}
+              {isLoading
+                ? "Sending..."
+                : isOfferMode
+                ? "Send Offer"
+                : "Send Message"}
             </Button>
-            <Button variant="outline" onClick={() => onOpenChange(false)}>
+            <Button
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              disabled={isLoading}
+            >
               Cancel
             </Button>
           </div>

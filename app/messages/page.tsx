@@ -1,16 +1,20 @@
-"use client";
-
-import { useRouter } from "next/navigation";
+import { redirect } from "next/navigation";
 import { MessagesInbox } from "@/components/messages-inbox";
+import { createServerClient } from "@/lib/supabase";
+import { getUserThreads } from "@/lib/queries/messages";
 
-export default function MessagesPage() {
-  const router = useRouter();
+export default async function MessagesPage() {
+  // Get authenticated user
+  const supabase = await createServerClient();
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
 
-  const handleBack = () => {
-    router.push('/');
-  };
+  // Redirect if not authenticated
+  if (!user || authError) {
+    redirect('/auth/login');
+  }
 
-  return (
-    <MessagesInbox onBack={handleBack} />
-  );
+  // Fetch threads for this user
+  const threads = await getUserThreads(user.id);
+
+  return <MessagesInbox threads={threads} currentUserId={user.id} />;
 }

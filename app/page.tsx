@@ -85,6 +85,9 @@ import { LanguageSwitcher, LanguageSwitcherMobile } from "@/components/LanguageS
 import { useTranslation } from "react-i18next";
 import { getListings } from "@/lib/queries/listings";
 import type { ListingWithImages } from "@/lib/database.types";
+import { getFavoriteIdsForUser } from "@/lib/queries/favorites";
+import { toggleFavorite } from "@/app/actions/favorites";
+import { getUnreadCount } from "@/lib/queries/messages";
 
 const categories = [
   { nameKey: "categories.electronics", icon: Laptop, count: "12.5K items" },
@@ -102,7 +105,7 @@ const categories = [
 ];
 
 // Helper function to convert database listing to Product format
-function convertListingToProduct(listing: any): Product {
+function convertListingToProduct(listing: any, isFavorited: boolean = false): Product {
   const primaryImage = (listing.images as any[])?.find((img: any) => img.is_primary) || (listing.images as any[])?.[0];
 
   // For auction listings, use current_price from auction table
@@ -131,6 +134,7 @@ function convertListingToProduct(listing: any): Product {
     auction: listing.type === 'auction',
     bids,
     timeLeft,
+    isFavorited,
     active_boost: listing.active_boost || null,
   };
 }
@@ -199,6 +203,13 @@ export default function App() {
   const [products, setProducts] = useState<Product[]>([]);
   const [productsLoading, setProductsLoading] = useState(true);
 
+  // Favorites state
+  const [favoriteIds, setFavoriteIds] = useState<Set<string>>(new Set());
+  const [favoritesLoading, setFavoritesLoading] = useState(false);
+
+  // Messages state
+  const [unreadCount, setUnreadCount] = useState<number>(0);
+
   // Filter state
   const [filters, setFilters] = useState<FilterState>({
     conditions: [],
@@ -231,6 +242,44 @@ export default function App() {
 
     loadUser();
   }, []);
+
+  // Load favorites when user changes
+  useEffect(() => {
+    async function loadFavorites() {
+      if (!user) {
+        setFavoriteIds(new Set());
+        return;
+      }
+
+      try {
+        const ids = await getFavoriteIdsForUser(user.id);
+        setFavoriteIds(new Set(ids));
+      } catch (error) {
+        console.error('Error loading favorites:', error);
+      }
+    }
+
+    loadFavorites();
+  }, [user]);
+
+  // Load unread message count when user changes
+  useEffect(() => {
+    async function loadUnreadCount() {
+      if (!user) {
+        setUnreadCount(0);
+        return;
+      }
+
+      try {
+        const count = await getUnreadCount(user.id);
+        setUnreadCount(count);
+      } catch (error) {
+        console.error('Error loading unread count:', error);
+      }
+    }
+
+    loadUnreadCount();
+  }, [user]);
 
   // Load listings on mount and when filters or search query change
   useEffect(() => {
@@ -292,7 +341,9 @@ export default function App() {
           );
         }
 
-        const convertedProducts = filteredListings.map(convertListingToProduct);
+        const convertedProducts = filteredListings.map(listing =>
+          convertListingToProduct(listing, favoriteIds.has(listing.id))
+        );
         setProducts(convertedProducts);
       } catch (error) {
         console.error('Error loading listings:', error);
@@ -302,7 +353,7 @@ export default function App() {
     }
 
     loadListings();
-  }, [filters, searchQuery]);
+  }, [filters, searchQuery, favoriteIds]);
 
   // Logout handler
   const handleLogout = async () => {
@@ -312,24 +363,94 @@ export default function App() {
     router.refresh();
   };
 
-  // Watchlist management
-  const addToWatchlist = (product: Product) => {
-    setWatchlistItems((prev) => {
-      const existing = prev.find((item) => item.product.id === product.id);
-      if (existing) {
-        toast.info("Already in watchlist");
-        return prev;
-      }
-      toast.success("Added to watchlist", {
-        description: `${product.title} has been saved`,
+  // Watchlist management with database persistence
+  const addToWatchlist = async (product: Product) => {
+    // Check if user is logged in
+    if (!user) {
+      toast.error("Please log in to save items", {
+        description: "You need to be logged in to use the watchlist"
       });
-      return [...prev, { product, savedAt: new Date() }];
-    });
+      router.push('/auth/login');
+      return;
+    }
+
+    // Prevent duplicate clicks
+    if (favoritesLoading) return;
+
+    // Optimistic update
+    const wasAlreadyFavorited = favoriteIds.has(product.id);
+    const newFavoriteIds = new Set(favoriteIds);
+
+    if (wasAlreadyFavorited) {
+      newFavoriteIds.delete(product.id);
+    } else {
+      newFavoriteIds.add(product.id);
+    }
+
+    setFavoriteIds(newFavoriteIds);
+    setFavoritesLoading(true);
+
+    try {
+      const result = await toggleFavorite(product.id);
+
+      if (!result.success) {
+        // Rollback on error
+        setFavoriteIds(favoriteIds);
+        toast.error(result.error || "Failed to update watchlist");
+        return;
+      }
+
+      // Update local watchlist items for backward compatibility
+      if (result.isFavorited) {
+        setWatchlistItems((prev) => {
+          const existing = prev.find((item) => item.product.id === product.id);
+          if (existing) return prev;
+          return [...prev, { product, savedAt: new Date() }];
+        });
+        toast.success("Added to watchlist", {
+          description: `${product.title} has been saved`,
+        });
+      } else {
+        setWatchlistItems((prev) => prev.filter((item) => item.product.id !== product.id));
+        toast.success("Removed from watchlist");
+      }
+    } catch (error) {
+      // Rollback on error
+      setFavoriteIds(favoriteIds);
+      console.error('Error toggling favorite:', error);
+      toast.error("An unexpected error occurred");
+    } finally {
+      setFavoritesLoading(false);
+    }
   };
 
-  const removeFromWatchlist = (productId: string) => {
+  const removeFromWatchlist = async (productId: string) => {
+    // This is called from the watchlist page
+    if (!user) return;
+
+    // Optimistic update
+    const newFavoriteIds = new Set(favoriteIds);
+    newFavoriteIds.delete(productId);
+    setFavoriteIds(newFavoriteIds);
     setWatchlistItems((prev) => prev.filter((item) => item.product.id !== productId));
-    toast.success("Removed from watchlist");
+
+    try {
+      const result = await toggleFavorite(productId);
+
+      if (!result.success) {
+        // Rollback on error
+        setFavoriteIds(favoriteIds);
+        toast.error(result.error || "Failed to remove from watchlist");
+        return;
+      }
+
+      toast.success("Removed from watchlist");
+    } catch (error) {
+      // Rollback on error
+      setFavoriteIds(favoriteIds);
+      console.error('Error removing favorite:', error);
+      toast.error("An unexpected error occurred");
+    }
   };
 
   const handleProductClick = (product: Product) => {
@@ -599,17 +720,19 @@ export default function App() {
               
               <NotificationsDropdown />
               
-              <Button 
-                variant="ghost" 
-                size="icon" 
+              <Button
+                variant="ghost"
+                size="icon"
                 className="relative"
-                onClick={() => setCurrentView("messages")}
+                onClick={() => router.push("/messages")}
                 title="Messages"
               >
                 <MessageCircle className="w-5 h-5" />
-                <BadgeComponent className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-[#fa6723]">
-                  3
-                </BadgeComponent>
+                {unreadCount > 0 && (
+                  <BadgeComponent className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-[#fa6723]">
+                    {unreadCount}
+                  </BadgeComponent>
+                )}
               </Button>
               <Button
                 variant="ghost"
@@ -788,11 +911,12 @@ export default function App() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {products.map((product) => (
                 <div key={product.id} onClick={() => handleProductClick(product)}>
-                  <ProductCard 
+                  <ProductCard
                     product={product}
                     onSaveToWatchlist={addToWatchlist}
                     onBuyNow={handleProductClick}
                     onMakeOffer={handleProductClick}
+                    isLoading={favoritesLoading}
                   />
                 </div>
               ))}

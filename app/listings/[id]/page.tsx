@@ -4,15 +4,39 @@ import { use, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ProductDetail } from "@/components/product-detail";
 import { getListing } from "@/lib/queries/listings";
+import { checkIsFavorited } from "@/lib/queries/favorites";
+import { toggleFavorite } from "@/app/actions/favorites";
+import { getCurrentUser } from "@/lib/auth";
+import { toast } from "sonner";
+import { Toaster } from "@/components/ui/sonner";
 import { Loader2 } from "lucide-react";
 import type { ListingFull } from "@/lib/database.types";
+import type { User as AuthUser } from "@supabase/supabase-js";
 
 export default function ListingDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const router = useRouter();
   const [listing, setListing] = useState<ListingFull | null>(null);
   const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [isFavorited, setIsFavorited] = useState(false);
+  const [favoriteLoading, setFavoriteLoading] = useState(false);
 
+  // Load user on mount
+  useEffect(() => {
+    async function loadUser() {
+      try {
+        const { user: currentUser } = await getCurrentUser();
+        setUser(currentUser);
+      } catch (error) {
+        console.error('Error loading user:', error);
+      }
+    }
+
+    loadUser();
+  }, []);
+
+  // Load listing and favorite status
   useEffect(() => {
     async function fetchListing() {
       try {
@@ -22,6 +46,12 @@ export default function ListingDetailPage({ params }: { params: Promise<{ id: st
           return;
         }
         setListing(data);
+
+        // Check if favorited
+        if (user) {
+          const favorited = await checkIsFavorited(user.id, id);
+          setIsFavorited(favorited);
+        }
       } catch (error) {
         console.error("Error fetching listing:", error);
         router.push('/');
@@ -31,7 +61,7 @@ export default function ListingDetailPage({ params }: { params: Promise<{ id: st
     }
 
     fetchListing();
-  }, [id, router]);
+  }, [id, router, user]);
 
   if (loading) {
     return (
@@ -44,6 +74,53 @@ export default function ListingDetailPage({ params }: { params: Promise<{ id: st
   if (!listing) {
     return null;
   }
+
+  // Handle favorite toggle
+  const handleSaveToWatchlist = async () => {
+    // Check if user is logged in
+    if (!user) {
+      toast.error("Please log in to save items", {
+        description: "You need to be logged in to use the watchlist"
+      });
+      router.push('/auth/login');
+      return;
+    }
+
+    // Prevent duplicate clicks
+    if (favoriteLoading) return;
+
+    // Optimistic update
+    const previousState = isFavorited;
+    setIsFavorited(!isFavorited);
+    setFavoriteLoading(true);
+
+    try {
+      const result = await toggleFavorite(listing.id);
+
+      if (!result.success) {
+        // Rollback on error
+        setIsFavorited(previousState);
+        toast.error(result.error || "Failed to update watchlist");
+        return;
+      }
+
+      // Show success message
+      if (result.isFavorited) {
+        toast.success("Added to watchlist", {
+          description: `${listing.title_en || listing.title_km} has been saved`,
+        });
+      } else {
+        toast.success("Removed from watchlist");
+      }
+    } catch (error) {
+      // Rollback on error
+      setIsFavorited(previousState);
+      console.error('Error toggling favorite:', error);
+      toast.error("An unexpected error occurred");
+    } finally {
+      setFavoriteLoading(false);
+    }
+  };
 
   // Convert database listing to Product format for ProductDetail component
   const product = {
@@ -68,6 +145,7 @@ export default function ListingDetailPage({ params }: { params: Promise<{ id: st
     timeLeft: listing.auction?.ends_at ? calculateTimeLeft(listing.auction.ends_at) : undefined,
     buyNow: listing.type === "fixed",
     shipping: "Contact seller",
+    isFavorited,
   };
 
   // Build auctionData prop if this is an auction
@@ -82,15 +160,18 @@ export default function ListingDetailPage({ params }: { params: Promise<{ id: st
   } : undefined;
 
   return (
-    <ProductDetail
-      product={product}
-      onBack={() => router.back()}
-      similarProducts={[]}
-      onSaveToWatchlist={() => {}}
-      onContactSeller={() => {}}
-      auctionData={auctionData}
-      currentUserId={listing.user_id}
-    />
+    <>
+      <ProductDetail
+        product={product}
+        onBack={() => router.back()}
+        similarProducts={[]}
+        onSaveToWatchlist={handleSaveToWatchlist}
+        onContactSeller={() => {}}
+        auctionData={auctionData}
+        currentUserId={listing.user_id}
+      />
+      <Toaster />
+    </>
   );
 }
 
