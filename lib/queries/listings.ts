@@ -265,7 +265,10 @@ export async function getListing(id: string): Promise<ListingFull | null> {
         location,
         rating,
         total_ratings,
-        total_sales
+        total_sales,
+        phone,
+        telegram,
+        whatsapp
       ),
       auction:auctions (
         id,

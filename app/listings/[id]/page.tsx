@@ -3,6 +3,7 @@
 import { use, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ProductDetail } from "@/components/product-detail";
+import { ContactSellerDialog } from "@/components/contact-seller-dialog";
 import { getListing } from "@/lib/queries/listings";
 import { checkIsFavorited } from "@/lib/queries/favorites";
 import { toggleFavorite } from "@/app/actions/favorites";
@@ -21,6 +22,9 @@ export default function ListingDetailPage({ params }: { params: Promise<{ id: st
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isFavorited, setIsFavorited] = useState(false);
   const [favoriteLoading, setFavoriteLoading] = useState(false);
+  const [isMessageDialogOpen, setIsMessageDialogOpen] = useState(false);
+  const [initialMessage, setInitialMessage] = useState("");
+  const [startInOfferMode, setStartInOfferMode] = useState(false);
 
   // Load user on mount
   useEffect(() => {
@@ -122,6 +126,13 @@ export default function ListingDetailPage({ params }: { params: Promise<{ id: st
     }
   };
 
+  // Handle message dialog
+  const handleMessage = (product: any, message?: string, offerMode?: boolean) => {
+    setInitialMessage(message || "");
+    setStartInOfferMode(offerMode || false);
+    setIsMessageDialogOpen(true);
+  };
+
   // Convert database listing to Product format for ProductDetail component
   const product = {
     id: listing.id,
@@ -139,6 +150,9 @@ export default function ListingDetailPage({ params }: { params: Promise<{ id: st
       rating: listing.user?.rating || 0,
       totalRatings: listing.user?.total_ratings || 0,
       totalSales: listing.user?.total_sales || 0,
+      phone: listing.user?.phone || null,
+      telegram: listing.user?.telegram || null,
+      whatsapp: listing.user?.whatsapp || null,
     },
     auction: listing.type === "auction",
     bids: listing.auction?.total_bids || 0,
@@ -166,9 +180,16 @@ export default function ListingDetailPage({ params }: { params: Promise<{ id: st
         onBack={() => router.back()}
         similarProducts={[]}
         onSaveToWatchlist={handleSaveToWatchlist}
-        onContactSeller={() => {}}
+        onContactSeller={handleMessage}
         auctionData={auctionData}
         currentUserId={listing.user_id}
+      />
+      <ContactSellerDialog
+        open={isMessageDialogOpen}
+        onOpenChange={setIsMessageDialogOpen}
+        product={product}
+        initialMessage={initialMessage}
+        startInOfferMode={startInOfferMode}
       />
       <Toaster />
     </>

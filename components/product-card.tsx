@@ -24,6 +24,17 @@ export interface Product {
     type: 'featured' | 'top_category';
     ends_at: string;
   } | null;
+  seller?: {
+    id: string;
+    name: string;
+    avatar: string;
+    rating: number;
+    totalRatings: number;
+    totalSales: number;
+    phone?: string | null;
+    telegram?: string | null;
+    whatsapp?: string | null;
+  };
 }
 
 interface ProductCardProps {

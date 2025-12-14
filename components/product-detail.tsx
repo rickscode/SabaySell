@@ -19,6 +19,7 @@ import {
   Shield,
   Clock,
   MessageSquare,
+  MessageCircle,
   ChevronLeft,
   Plus,
   Minus,
@@ -412,34 +413,60 @@ export function ProductDetail({ product, onBack, similarProducts, onContactSelle
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center gap-3">
                   <Avatar>
-                    <AvatarImage src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop" />
-                    <AvatarFallback>JD</AvatarFallback>
+                    <AvatarImage src={product.seller?.avatar || ""} />
+                    <AvatarFallback>
+                      {product.seller?.name?.[0]?.toUpperCase() || "?"}
+                    </AvatarFallback>
                   </Avatar>
                   <div>
-                    <p>tech_seller_pro</p>
+                    <p>{product.seller?.name || "Unknown Seller"}</p>
                     <div className="flex items-center gap-1 text-sm">
                       <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                      <span>4.8 (2,453 reviews)</span>
+                      <span>
+                        {product.seller?.rating || 0} ({product.seller?.totalRatings || 0} reviews)
+                      </span>
                     </div>
                   </div>
                 </div>
               </div>
               <div className="space-y-2 text-sm text-gray-600">
-                <p>• 99.2% positive feedback</p>
-                <p>• 5,234 items sold</p>
-                <p>• Usually responds within 1 hour</p>
+                <p>• {Math.round(((product.seller?.rating || 0) / 5) * 100)}% positive feedback</p>
+                <p>• {product.seller?.totalSales || 0} items sold</p>
               </div>
-              <div className="flex gap-2 mt-3">
-                <Button 
-                  variant="outline" 
-                  className="flex-1"
+              <div className="grid grid-cols-2 gap-2 mt-3">
+                {/* Row 1: Telegram and WhatsApp */}
+                <Button
+                  variant="outline"
+                  onClick={() => window.open(`https://t.me/${product.seller?.telegram?.replace('@', '')}`, '_blank')}
+                  disabled={!product.seller?.telegram}
+                >
+                  <MessageCircle className="w-4 h-4 mr-2" />
+                  Telegram
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => window.open(`https://wa.me/${product.seller?.whatsapp?.replace(/\s/g, '')}`, '_blank')}
+                  disabled={!product.seller?.whatsapp}
+                >
+                  <MessageCircle className="w-4 h-4 mr-2" />
+                  WhatsApp
+                </Button>
+
+                {/* Row 2: Call and Message (in-platform) */}
+                <Button
+                  variant="outline"
+                  onClick={() => window.open(`tel:${product.seller?.phone}`)}
+                  disabled={!product.seller?.phone}
+                >
+                  <Phone className="w-4 h-4 mr-2" />
+                  Call
+                </Button>
+                <Button
+                  variant="outline"
                   onClick={() => onContactSeller(product)}
                 >
                   <MessageSquare className="w-4 h-4 mr-2" />
                   Message
-                </Button>
-                <Button variant="outline" size="icon">
-                  <Phone className="w-4 h-4" />
                 </Button>
               </div>
             </Card>

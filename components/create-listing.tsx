@@ -36,6 +36,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { createListing, uploadImagesForListing, updateListing, type CreateListingData } from "@/app/actions/listings";
+import { updateUserProfile } from "@/app/actions/users";
 
 interface CreateListingProps {
   onBack: () => void;
@@ -203,6 +204,15 @@ export function CreateListing({ onBack, onPublish, editingListing }: CreateListi
         return;
       }
 
+      // Update user's contact information if provided
+      if (formData.phoneNumber || formData.telegram || formData.whatsapp) {
+        await updateUserProfile({
+          phone: formData.phoneNumber,
+          telegram: formData.telegram,
+          whatsapp: formData.whatsapp,
+        });
+      }
+
       // Upload images if any
       if (imageFiles.length > 0) {
         const formData = new FormData();
@@ -258,6 +268,44 @@ export function CreateListing({ onBack, onPublish, editingListing }: CreateListi
 
   const updateFormData = (field: string, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  // Handle contact field updates with smart defaulting
+  const handleContactFieldChange = (field: "phoneNumber" | "telegram" | "whatsapp", value: string) => {
+    // Add +855 prefix if not present and value is entered (for phone fields)
+    let formattedValue = value;
+    if ((field === "phoneNumber" || field === "whatsapp") && value && !value.startsWith("+855")) {
+      formattedValue = "+855 " + value.replace(/^\+855\s*/, "");
+    }
+
+    setFormData((prev) => {
+      const newData = { ...prev, [field]: formattedValue };
+
+      // Smart defaulting: if this is the only filled field, copy to others
+      const contactFields = {
+        phoneNumber: newData.phoneNumber,
+        telegram: newData.telegram,
+        whatsapp: newData.whatsapp,
+      };
+
+      const filledFields = Object.values(contactFields).filter(v => v && v.trim()).length;
+
+      // If only one field is filled, copy it to the others
+      if (formattedValue && filledFields === 1) {
+        if (field === "phoneNumber" && !contactFields.telegram && !contactFields.whatsapp) {
+          newData.telegram = formattedValue;
+          newData.whatsapp = formattedValue;
+        } else if (field === "telegram" && !contactFields.phoneNumber && !contactFields.whatsapp) {
+          newData.phoneNumber = formattedValue;
+          newData.whatsapp = formattedValue;
+        } else if (field === "whatsapp" && !contactFields.phoneNumber && !contactFields.telegram) {
+          newData.phoneNumber = formattedValue;
+          newData.telegram = formattedValue;
+        }
+      }
+
+      return newData;
+    });
   };
 
   return (
@@ -653,30 +701,34 @@ export function CreateListing({ onBack, onPublish, editingListing }: CreateListi
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="phoneNumber">Phone Number</Label>
+                <Label htmlFor="phoneNumber">
+                  Phone Number (for calls)
+                  <span className="text-xs text-gray-500 ml-2">Fill one field to auto-populate others</span>
+                </Label>
                 <div className="relative">
                   <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
                   <Input
                     id="phoneNumber"
                     type="tel"
-                    placeholder="+855 12 345 678"
+                    placeholder="12 345 678"
                     className="pl-10"
                     value={formData.phoneNumber}
-                    onChange={(e) => updateFormData("phoneNumber", e.target.value)}
+                    onChange={(e) => handleContactFieldChange("phoneNumber", e.target.value)}
                   />
                 </div>
+                <p className="text-xs text-gray-500">Country code +855 will be added automatically</p>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="telegram">Telegram Username</Label>
+                <Label htmlFor="telegram">Telegram Number</Label>
                 <div className="relative">
                   <MessageCircle className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
                   <Input
                     id="telegram"
-                    placeholder="@username"
+                    placeholder="12 345 678 or @username"
                     className="pl-10"
                     value={formData.telegram}
-                    onChange={(e) => updateFormData("telegram", e.target.value)}
+                    onChange={(e) => handleContactFieldChange("telegram", e.target.value)}
                   />
                 </div>
               </div>
@@ -688,10 +740,10 @@ export function CreateListing({ onBack, onPublish, editingListing }: CreateListi
                   <Input
                     id="whatsapp"
                     type="tel"
-                    placeholder="+855 12 345 678"
+                    placeholder="12 345 678"
                     className="pl-10"
                     value={formData.whatsapp}
-                    onChange={(e) => updateFormData("whatsapp", e.target.value)}
+                    onChange={(e) => handleContactFieldChange("whatsapp", e.target.value)}
                   />
                 </div>
               </div>

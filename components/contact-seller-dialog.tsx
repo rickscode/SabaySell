@@ -75,18 +75,13 @@ export function ContactSellerDialog({
     }
   };
 
-  // Mock seller contact info
-  const sellerPhone = "+855 12 345 678";
-  const sellerTelegram = "@seller_username";
-  const sellerWhatsApp = "+85512345678";
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Contact Seller</DialogTitle>
           <DialogDescription>
-            Send a message or make an offer to the seller
+            Send a message to the seller through the platform
           </DialogDescription>
         </DialogHeader>
 
@@ -105,44 +100,7 @@ export function ContactSellerDialog({
           </div>
         </div>
 
-        {/* Quick Contact Options */}
-        <div className="space-y-2">
-          <p className="text-sm">Quick Contact via:</p>
-          <div className="flex flex-wrap gap-2">
-            <Button
-              variant="outline"
-              className="flex-1"
-              onClick={() => window.open(`tel:${sellerPhone}`)}
-            >
-              <Phone className="w-4 h-4 mr-2" />
-              Call
-            </Button>
-            <Button
-              variant="outline"
-              className="flex-1"
-              onClick={() => window.open(`https://t.me/${sellerTelegram.slice(1)}`)}
-            >
-              <MessageCircle className="w-4 h-4 mr-2" />
-              Telegram
-            </Button>
-            <Button
-              variant="outline"
-              className="flex-1"
-              onClick={() => window.open(`https://wa.me/${sellerWhatsApp.replace(/\s/g, "")}`)}
-            >
-              <MessageCircle className="w-4 h-4 mr-2" />
-              WhatsApp
-            </Button>
-          </div>
-          <div className="text-xs text-gray-600 space-y-1">
-            <p>📞 Phone: {sellerPhone}</p>
-            <p>💬 Telegram: {sellerTelegram}</p>
-            <p>📱 WhatsApp: {sellerWhatsApp}</p>
-          </div>
-        </div>
-
-        <div className="border-t pt-4">
-          <p className="text-sm mb-3">Or send a message through the platform:</p>
+        <div>
 
           {/* Make Offer Toggle */}
           <div className="flex items-center gap-2 mb-3">
