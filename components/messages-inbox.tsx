@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
 import { Input } from "./ui/input";
@@ -19,6 +19,7 @@ import { ImageWithFallback } from "./figma/ImageWithFallback";
 import type { ThreadWithDetails, MessageWithSender } from "@/lib/database.types";
 import { sendMessage, markMessagesAsRead } from "@/app/actions/messages";
 import { toast } from "sonner";
+import { useSocket } from "@/lib/hooks/useSocket";
 
 interface MessagesInboxProps {
   threads: ThreadWithDetails[];
@@ -27,16 +28,32 @@ interface MessagesInboxProps {
 
 export function MessagesInbox({ threads, currentUserId }: MessagesInboxProps) {
   const router = useRouter();
-  const [selectedThreadId, setSelectedThreadId] = useState<string | null>(null);
+  const searchParams = useSearchParams();
+  const threadParam = searchParams.get("thread");
+
+  const [localThreads, setLocalThreads] = useState(threads);
+  const [selectedThreadId, setSelectedThreadId] = useState<string | null>(threadParam);
   const [searchQuery, setSearchQuery] = useState("");
   const [messageInput, setMessageInput] = useState("");
   const [isSending, setIsSending] = useState(false);
 
-  // Get selected thread
-  const selectedThread = threads.find((t) => t.id === selectedThreadId) || null;
+  // Sync selected thread with URL param
+  useEffect(() => {
+    if (threadParam) {
+      setSelectedThreadId(threadParam);
+    }
+  }, [threadParam]);
+
+  // Sync local threads when props change (e.g., on initial load or page refresh)
+  useEffect(() => {
+    setLocalThreads(threads);
+  }, [threads]);
+
+  // Get selected thread from local state
+  const selectedThread = localThreads.find((t) => t.id === selectedThreadId) || null;
 
   // Filter threads by search
-  const filteredThreads = threads.filter((thread) => {
+  const filteredThreads = localThreads.filter((thread) => {
     if (!searchQuery.trim()) return true;
 
     const query = searchQuery.toLowerCase();
@@ -59,6 +76,59 @@ export function MessagesInbox({ threads, currentUserId }: MessagesInboxProps) {
     }
   }, [selectedThreadId]);
 
+  // Socket.IO real-time message subscription
+  const socket = useSocket();
+
+  useEffect(() => {
+    if (!selectedThreadId || !socket) {
+      console.log('🟢 SOCKET.IO: No selected thread or socket, skipping subscription');
+      return;
+    }
+
+    console.log('🟢 SOCKET.IO: Joining thread:', selectedThreadId);
+    socket.emit('thread:join', selectedThreadId);
+
+    const handleNewMessage = (message: MessageWithSender) => {
+      console.log('📨 SOCKET.IO: Received new message:', message);
+
+      // Only update if message is from another user (avoid duplicates from own sends)
+      if (message.sender_id !== currentUserId) {
+        console.log('📨 SOCKET.IO: Message from other user, processing...');
+
+        // Add message to local state
+        setLocalThreads((prev) =>
+          prev.map((thread) => {
+            if (thread.id === selectedThreadId) {
+              return {
+                ...thread,
+                messages: [...(thread.messages || []), message],
+                last_message_at: message.created_at,
+              };
+            }
+            return thread;
+          })
+        );
+
+        // Show notification
+        toast.success(`New message from ${message.sender.display_name}`);
+
+        // Mark as read immediately since user is viewing this thread
+        markMessagesAsRead(selectedThreadId);
+      } else {
+        console.log('📨 SOCKET.IO: Message from self, ignoring');
+      }
+    };
+
+    socket.on('message:new', handleNewMessage);
+
+    // Cleanup on unmount or thread change
+    return () => {
+      console.log('🔴 SOCKET.IO: Leaving thread:', selectedThreadId);
+      socket.emit('thread:leave', selectedThreadId);
+      socket.off('message:new', handleNewMessage);
+    };
+  }, [selectedThreadId, socket, currentUserId]);
+
   // Handle sending a message
   const handleSendMessage = async () => {
     if (!messageInput.trim() || !selectedThreadId || isSending) return;
@@ -68,10 +138,45 @@ export function MessagesInbox({ threads, currentUserId }: MessagesInboxProps) {
     try {
       const result = await sendMessage(selectedThreadId, messageInput.trim());
 
-      if (result.success) {
+      if (result.success && result.messageId) {
+        // Create message object to add to UI
+        const newMessage: any = {
+          id: result.messageId,
+          thread_id: selectedThreadId,
+          sender_id: currentUserId,
+          body: messageInput.trim(),
+          created_at: new Date().toISOString(),
+          is_read: false,
+          read_at: null,
+          attachment_url: null,
+          sender: {
+            id: currentUserId,
+            display_name: selectedThread?.buyer_id === currentUserId
+              ? selectedThread.buyer.display_name
+              : selectedThread?.seller.display_name,
+            avatar_url: selectedThread?.buyer_id === currentUserId
+              ? selectedThread.buyer.avatar_url
+              : selectedThread?.seller.avatar_url
+          }
+        };
+
+        // Update local threads state
+        setLocalThreads((prev) =>
+          prev.map((thread) => {
+            if (thread.id === selectedThreadId) {
+              return {
+                ...thread,
+                messages: [...(thread.messages || []), newMessage],
+                last_message_at: newMessage.created_at,
+              };
+            }
+            return thread;
+          })
+        );
+
         setMessageInput("");
-        // Refresh the page to show the new message
-        router.refresh();
+        toast.success("Message sent!");
+        // NO router.push() or router.refresh() - state update handles it
       } else {
         toast.error(result.error || "Failed to send message");
       }
@@ -172,7 +277,10 @@ export function MessagesInbox({ threads, currentUserId }: MessagesInboxProps) {
                   {filteredThreads.map((thread) => (
                     <button
                       key={thread.id}
-                      onClick={() => setSelectedThreadId(thread.id)}
+                      onClick={() => {
+                        setSelectedThreadId(thread.id);
+                        router.push(`/messages?thread=${thread.id}`, { scroll: false });
+                      }}
                       className={`w-full p-4 text-left transition-colors hover:bg-gray-50 ${
                         selectedThreadId === thread.id ? "bg-gray-100" : ""
                       }`}
@@ -229,11 +337,11 @@ export function MessagesInbox({ threads, currentUserId }: MessagesInboxProps) {
           </div>
 
           {/* Messages Panel */}
-          <div className="hidden md:flex flex-1 flex-col">
+          <div className="hidden md:flex flex-1 flex-col overflow-hidden">
             {selectedThread ? (
               <>
                 {/* Conversation Header */}
-                <div className="p-4 border-b">
+                <div className="p-4 border-b flex-shrink-0">
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 bg-gray-100 rounded-full overflow-hidden shrink-0">
                       {getOtherPartyAvatar(selectedThread) ? (
@@ -270,7 +378,7 @@ export function MessagesInbox({ threads, currentUserId }: MessagesInboxProps) {
                 </div>
 
                 {/* Messages */}
-                <ScrollArea className="flex-1 p-4">
+                <ScrollArea className="flex-1 p-4 overflow-y-auto">
                   <div className="space-y-4">
                     {selectedThread.messages && selectedThread.messages.length > 0 ? (
                       selectedThread.messages.map((message: MessageWithSender) => {
@@ -313,7 +421,7 @@ export function MessagesInbox({ threads, currentUserId }: MessagesInboxProps) {
                 </ScrollArea>
 
                 {/* Message Input */}
-                <div className="p-4 border-t">
+                <div className="p-4 border-t flex-shrink-0">
                   <div className="flex gap-2">
                     <Textarea
                       placeholder="Type your message..."
@@ -325,6 +433,7 @@ export function MessagesInbox({ threads, currentUserId }: MessagesInboxProps) {
                       disabled={isSending}
                     />
                     <Button
+                      type="button"
                       onClick={handleSendMessage}
                       disabled={!messageInput.trim() || isSending}
                       className="bg-[#fa6723] hover:bg-[#e55a1f] shrink-0"

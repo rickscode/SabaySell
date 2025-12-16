@@ -30,10 +30,10 @@ export interface ThreadWithDetails extends Thread {
 /**
  * Get all threads for a user (as buyer or seller)
  */
-export async function getUserThreads(userId: string): Promise<ThreadWithDetails[]> {
-  const supabase = createClient()
+export async function getUserThreads(userId: string, supabase?: any): Promise<ThreadWithDetails[]> {
+  const client = supabase || createClient()
 
-  const { data, error } = await supabase
+  const { data, error } = await client
     .from('threads')
     .select(`
       *,
@@ -47,19 +47,15 @@ export async function getUserThreads(userId: string): Promise<ThreadWithDetails[
       ),
       buyer:users!threads_buyer_id_fkey (
         id,
-        email,
         display_name,
         avatar_url,
-        phone_number,
-        language_preference
+        phone
       ),
       seller:users!threads_seller_id_fkey (
         id,
-        email,
         display_name,
         avatar_url,
-        phone_number,
-        language_preference
+        phone
       ),
       messages (
         *,
@@ -98,10 +94,10 @@ export async function getUserThreads(userId: string): Promise<ThreadWithDetails[
 /**
  * Get a single thread by ID with access check
  */
-export async function getThread(threadId: string, userId: string): Promise<ThreadWithDetails | null> {
-  const supabase = createClient()
+export async function getThread(threadId: string, userId: string, supabase?: any): Promise<ThreadWithDetails | null> {
+  const client = supabase || createClient()
 
-  const { data, error } = await supabase
+  const { data, error } = await client
     .from('threads')
     .select(`
       *,
@@ -115,19 +111,15 @@ export async function getThread(threadId: string, userId: string): Promise<Threa
       ),
       buyer:users!threads_buyer_id_fkey (
         id,
-        email,
         display_name,
         avatar_url,
-        phone_number,
-        language_preference
+        phone
       ),
       seller:users!threads_seller_id_fkey (
         id,
-        email,
         display_name,
         avatar_url,
-        phone_number,
-        language_preference
+        phone
       ),
       messages (
         *,
@@ -170,24 +162,31 @@ export async function getThread(threadId: string, userId: string): Promise<Threa
  */
 export async function findOrCreateThread(
   listingId: string,
-  buyerId: string
+  buyerId: string,
+  supabase: any
 ): Promise<{ thread: Thread; isNew: boolean }> {
-  const supabase = createClient()
+  console.log('🔵 findOrCreateThread() called:', { listingId, buyerId });
 
   // First, get the listing to find the seller
+  console.log('🔵 Fetching listing to get seller...');
   const { data: listing, error: listingError } = await supabase
     .from('listings')
     .select('user_id')
     .eq('id', listingId)
     .single()
 
+  console.log('🔵 Listing result:', { listing, listingError });
+
   if (listingError || !listing) {
+    console.error('❌ Listing not found');
     throw new Error('Listing not found')
   }
 
   const sellerId = (listing as any).user_id
+  console.log('🔵 Seller ID:', sellerId);
 
   // Check for existing thread
+  console.log('🔵 Checking for existing thread...');
   const { data: existingThread, error: findError } = await supabase
     .from('threads')
     .select('*')
@@ -196,11 +195,15 @@ export async function findOrCreateThread(
     .eq('seller_id', sellerId)
     .single()
 
+  console.log('🔵 Existing thread search:', { existingThread, findError });
+
   if (existingThread && !findError) {
+    console.log('✅ Found existing thread:', existingThread.id);
     return { thread: existingThread as Thread, isNew: false }
   }
 
   // Create new thread
+  console.log('🔵 Creating new thread:', { listingId, buyerId, sellerId });
   const { data: newThread, error: createError } = await supabase
     .from('threads')
     .insert({
@@ -215,21 +218,25 @@ export async function findOrCreateThread(
     .select()
     .single()
 
+  console.log('🔵 Thread creation result:', { newThread, createError });
+
   if (createError || !newThread) {
-    throw new Error('Failed to create thread')
+    console.error('❌ Failed to create thread:', createError);
+    throw new Error(`Failed to create thread: ${createError?.message || 'Unknown error'}`)
   }
 
+  console.log('✅ Created new thread:', newThread.id);
   return { thread: newThread as Thread, isNew: true }
 }
 
 /**
  * Get total unread message count for a user
  */
-export async function getUnreadCount(userId: string): Promise<number> {
-  const supabase = createClient()
+export async function getUnreadCount(userId: string, supabase?: any): Promise<number> {
+  const client = supabase || createClient()
 
   // Get all threads for user
-  const { data: threads, error: threadsError } = await supabase
+  const { data: threads, error: threadsError } = await client
     .from('threads')
     .select('id')
     .or(`buyer_id.eq.${userId},seller_id.eq.${userId}`)
@@ -248,7 +255,7 @@ export async function getUnreadCount(userId: string): Promise<number> {
   }
 
   // Count unread messages in those threads where sender is not the current user
-  const { count, error: countError } = await supabase
+  const { count, error: countError } = await client
     .from('messages')
     .select('*', { count: 'exact', head: true })
     .in('thread_id', threadIds)

@@ -14,7 +14,7 @@ export default async function MessagesPage() {
   }
 
   // Fetch threads for this user
-  const threads = await getUserThreads(user.id);
+  const threads = await getUserThreads(user.id, supabase);
 
   return <MessagesInbox threads={threads} currentUserId={user.id} />;
 }

@@ -10,12 +10,13 @@ A free-to-list Cambodian marketplace enabling locals to sell goods via fixed pri
 
 ---
 
-## 🚀 Current Status (December 13, 2025)
+## 🚀 Current Status (December 16, 2025)
 
 **Phase**: 3 of 5 (Core Features)
 
 **Build Status**: ✅ Production-ready
-- Dev server: http://localhost:3000
+- Dev server: http://localhost:3000 (Next.js)
+- Socket.IO server: http://localhost:3001 (Real-time messaging)
 - Build: Compiles successfully (1 pre-existing TypeScript warning in auctions.ts)
 - Database: Connected (Supabase)
 
@@ -43,7 +44,7 @@ A free-to-list Cambodian marketplace enabling locals to sell goods via fixed pri
   - Uses ILIKE for pattern matching (supports Khmer text)
   - Integrated with homepage search bar
   - Real-time filtering as you type
-- ✅ **Messaging Backend - READY FOR TESTING** 🎉
+- ✅ **Messaging System - READY FOR TESTING** 🎉
   - Backend fully implemented (Dec 13, 2025)
   - Query layer: `lib/queries/messages.ts` (5 functions)
   - Server actions: `app/actions/messages.ts` (4 actions)
@@ -53,27 +54,35 @@ A free-to-list Cambodian marketplace enabling locals to sell goods via fixed pri
   - Self-messaging prevention
   - Thread deduplication
   - RLS policies enforced
+  - **Socket.IO Real-Time Delivery - IMPLEMENTED** (Dec 16, 2025)
+    - Socket.IO server on port 3001
+    - Client hook: `lib/hooks/useSocket.ts`
+    - Room-based messaging (thread rooms)
+    - Instant message delivery
+    - Toast notifications
+    - Replaces Supabase Realtime (which didn't work after extensive debugging)
   - **Testing scheduled for next session**
 - ✅ Boost system (PayPal ready, untested)
 - ⚠️ i18n (homepage only, other pages TODO)
 
 **Not Working Yet**:
 - ❌ Notifications (not implemented)
-- ❌ Real-time updates (Socket.IO not integrated - messages require page refresh)
+- ❌ Real-time auction updates (Socket.IO not integrated for auctions yet)
 
 ---
 
 ## 📋 Next Priorities
 
-### Immediate (Next Session - December 14, 2025)
-1. **Test Messaging System** ⏳ PRIORITY
-   - Test Contact Seller dialog → creates thread
-   - Test sending messages in inbox
-   - Verify unread count badge updates
-   - Test mark as read functionality
-   - Verify RLS policies (can't see other users' threads)
-   - Test self-messaging prevention
-   - Test across page refresh (persistence)
+### Immediate (Next Session - December 16, 2025)
+1. **Test Socket.IO Real-Time Messaging** ⏳ PRIORITY
+   - Start both servers: `npm run dev:all`
+   - Test with two browsers (different Google accounts)
+   - Verify instant message delivery (< 1 second)
+   - Check console logs for Socket.IO connection
+   - Verify toast notifications
+   - Test consecutive messages
+   - Test page refresh persistence
+   - Test across thread switching
 
 ### Week 1 - After Messaging Tests Pass
 2. **Notifications** (1 day)
@@ -81,11 +90,10 @@ A free-to-list Cambodian marketplace enabling locals to sell goods via fixed pri
    - Create `lib/queries/notifications.ts`
    - Add triggers (outbid, auction ending, new messages)
 
-3. **Socket.IO Integration** (2-3 days)
+3. **Socket.IO for Auctions** (1-2 days)
    - Real-time bid updates
-   - Real-time message delivery
-   - Typing indicators
-   - Live unread count updates
+   - Live countdown timers
+   - Outbid notifications
 
 4. **Fix i18n on all pages** (deferred)
    - Add translation keys to all components
@@ -292,38 +300,52 @@ Fully tested and working:
 - Optimistic UI updates with rollback on error
 - Works across homepage, product detail, and watchlist pages
 
-### Messaging Testing (Ready for Tomorrow ⏳)
-**Backend Implementation Complete** (December 13, 2025)
+### Socket.IO Real-Time Messaging Testing (Ready for Testing ⏳)
+**Implementation Complete** (December 16, 2025)
 
-Testing checklist for next session:
-1. **Contact Seller Flow**:
-   - Navigate to any product listing
-   - Click "Contact Seller" button
-   - Send a message (with/without offer)
-   - Verify redirect to `/messages` route
-   - Verify thread appears in inbox
+**What Was Implemented:**
+- Socket.IO server (`lib/socket.ts`) - Standalone server on port 3001
+- Socket.IO client hook (`lib/hooks/useSocket.ts`) - React hook for connection
+- Server action integration (`app/actions/messages.ts`) - Emits Socket.IO events after DB save
+- Messages inbox update (`components/messages-inbox.tsx`) - Replaces Supabase Realtime
+- Environment variables (`.env.local`) - Socket.IO configuration
+- NPM scripts (`package.json`) - `npm run dev:all` runs both servers
 
-2. **Messages Inbox**:
-   - Check unread count badge on homepage
-   - Open `/messages` route
-   - Verify thread list displays
-   - Click on a thread
-   - Send messages back and forth
-   - Verify messages persist on page refresh
+**Testing Checklist:**
+1. **Start Servers**:
+   ```bash
+   npm run dev:all
+   ```
+   - Verify Socket.IO server logs: `✅ Socket.IO server listening on port 3001`
+   - Verify Next.js server: `http://localhost:3000`
 
-3. **Security & Edge Cases**:
-   - Try messaging yourself (should show error)
-   - Verify RLS: cannot see other users' threads
-   - Test mark as read (badge count updates)
-   - Test search in messages inbox
-   - Verify thread deduplication (same buyer-listing = same thread)
+2. **Real-Time Message Delivery**:
+   - Open two browsers with different Google accounts
+   - Navigate to same message thread in both browsers
+   - Check console for: `✅ Socket.IO connected: {id}`
+   - Send message from sender
+   - **Receiver should see**:
+     - `📨 SOCKET.IO: Received new message` in console
+     - Message appears instantly (< 1 second)
+     - Toast notification shows
+     - No page refresh needed
 
-4. **Files to Review if Issues**:
-   - `lib/queries/messages.ts` - Query layer
-   - `app/actions/messages.ts` - Server actions
-   - `components/contact-seller-dialog.tsx` - Contact flow
-   - `components/messages-inbox.tsx` - Inbox UI
-   - `app/messages/page.tsx` - Messages route
+3. **Edge Cases**:
+   - Test consecutive messages (should all appear instantly)
+   - Test page refresh (messages persist in database)
+   - Test switching threads (Socket.IO room changes)
+   - Test browser disconnect/reconnect
+
+4. **Files Involved**:
+   - `lib/socket.ts` - Socket.IO server
+   - `lib/hooks/useSocket.ts` - Client hook
+   - `app/actions/messages.ts` - Server action with Socket.IO emit
+   - `components/messages-inbox.tsx` - Socket.IO subscription
+   - `.env.local` - Socket.IO environment variables
+
+**Known Issues:**
+- Supabase Realtime was attempted but failed after extensive debugging (Dec 16, 2025)
+- Pivoted to Socket.IO for guaranteed reliability and MVP deadline
 
 ---
 
@@ -352,11 +374,22 @@ Testing checklist for next session:
 
 ---
 
-**Last Updated**: December 13, 2025
-**Current Task**: Messaging backend complete! Ready for testing tomorrow.
-**Status**: Auction, Favorites, Search fully working ✅ | Messaging backend implemented ⏳
+**Last Updated**: December 16, 2025
+**Current Task**: Socket.IO real-time messaging implemented! Ready for testing.
+**Status**: Auction, Favorites, Search fully working ✅ | Messaging + Socket.IO implemented ⏳
 
-**Today's Session (Dec 13, 2025)**:
+**Today's Session (Dec 16, 2025)**:
+- ✅ Attempted to fix Supabase Realtime (multiple approaches failed)
+- ✅ Pivoted to Socket.IO for reliable real-time messaging
+- ✅ Installed Socket.IO dependencies (socket.io, socket.io-client, concurrently)
+- ✅ Created Socket.IO server (`lib/socket.ts`) on port 3001
+- ✅ Created Socket.IO client hook (`lib/hooks/useSocket.ts`)
+- ✅ Updated server action to emit Socket.IO events after DB save
+- ✅ Replaced Supabase Realtime with Socket.IO in messages inbox
+- ✅ Updated environment variables and npm scripts
+- ⏳ Testing scheduled for next session (awaiting user return from meeting)
+
+**Previous Session (Dec 13, 2025)**:
 - ✅ Implemented complete messaging backend
 - ✅ Created `lib/queries/messages.ts` with 5 query functions
 - ✅ Created `app/actions/messages.ts` with 4 server actions
@@ -364,6 +397,5 @@ Testing checklist for next session:
 - ✅ Rewrote Messages Inbox component to use database data
 - ✅ Added unread count badge on homepage
 - ✅ Implemented thread deduplication, RLS security, self-messaging prevention
-- ⏳ Testing scheduled for next session (Dec 14, 2025)
 
 **Detailed History**: See `ARCHIVE-SESSIONS.md` for complete session notes from Oct 23 - Nov 25, 2025.

@@ -38,11 +38,13 @@ Dashboard → Authentication → Providers → Enable "Phone"
 # Test database connection
 npm run test:db
 
-# Start dev server
-npm run dev
+# Start both dev servers (Next.js + Socket.IO)
+npm run dev:all
 ```
 
 Visit: http://localhost:3000/auth/login
+
+**Note:** Real-time messaging requires both servers running (`npm run dev:all`)
 
 ## What You Can Do Now
 
@@ -150,7 +152,9 @@ scripts/
 
 ```bash
 # Development
-npm run dev              # Start dev server
+npm run dev              # Start Next.js dev server (http://localhost:3000)
+npm run socket           # Start Socket.IO server (http://localhost:3001)
+npm run dev:all          # Start both servers concurrently (RECOMMENDED)
 npm run build            # Build for production
 npm run start            # Start production server
 
@@ -163,6 +167,8 @@ supabase db push         # Push migrations
 supabase db pull         # Pull schema changes
 supabase db reset        # Reset database
 ```
+
+**Note:** For real-time messaging to work, you must run both servers using `npm run dev:all`.
 
 ## Troubleshooting
 
