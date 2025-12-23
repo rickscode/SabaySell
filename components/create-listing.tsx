@@ -37,6 +37,9 @@ import {
 import { toast } from "sonner";
 import { createListing, uploadImagesForListing, updateListing, type CreateListingData } from "@/app/actions/listings";
 import { updateUserProfile } from "@/app/actions/users";
+import { getAllCategories } from "@/lib/constants/categories";
+import { getBrandsForCategory, type ElectronicsCategory } from "@/lib/constants/brands";
+import { getModelsForBrand } from "@/lib/constants/models";
 
 interface CreateListingProps {
   onBack: () => void;
@@ -44,20 +47,8 @@ interface CreateListingProps {
   editingListing?: any;
 }
 
-const categories = [
-  "Electronics",
-  "Mobile Phones",
-  "Cameras",
-  "Audio",
-  "Watches",
-  "Home & Garden",
-  "Fashion",
-  "Books",
-  "Sports",
-  "Toys",
-  "Automotive",
-  "Collectibles",
-];
+// Electronics-only categories for MVP (SEO-optimized for Cambodia)
+const categories = getAllCategories().map(cat => cat.id);
 
 const conditions = [
   { label: "New", value: "new" },
@@ -73,8 +64,16 @@ const locations = [
   "Other Location",
 ];
 
+const storageOptions = ["64GB", "128GB", "256GB", "512GB", "1TB", "2TB", "Other"];
+const ramOptions = ["2GB", "4GB", "6GB", "8GB", "12GB", "16GB", "32GB", "64GB", "Other"];
+
 export function CreateListing({ onBack, onPublish, editingListing }: CreateListingProps) {
   const router = useRouter();
+
+  // MVP Feature Flags - Set to false to hide features while keeping code intact
+  const ENABLE_AUCTIONS = false;
+  const ENABLE_MESSAGING = false;
+
   const [listingType, setListingType] = useState<"buy-now" | "auction">(
     editingListing?.type || "buy-now"
   );
@@ -103,6 +102,10 @@ export function CreateListing({ onBack, onPublish, editingListing }: CreateListi
     quantity: editingListing?.quantity || "1",
     featuredInCategory: editingListing?.featuredInCategory || false,
     featuredOnHomepage: editingListing?.featuredOnHomepage || false,
+    brand: editingListing?.brand || "",
+    model: editingListing?.model || "",
+    storage: editingListing?.storage || "",
+    ram: editingListing?.ram || "",
   });
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -160,6 +163,12 @@ export function CreateListing({ onBack, onPublish, editingListing }: CreateListi
       return;
     }
 
+    // MVP: Require at least one of Telegram or WhatsApp for contact
+    if (!formData.telegram?.trim() && !formData.whatsapp?.trim()) {
+      toast.error("Please provide at least Telegram or WhatsApp contact for buyers to reach you");
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -188,6 +197,10 @@ export function CreateListing({ onBack, onPublish, editingListing }: CreateListi
         reserve_price: listingType === "auction" && formData.reservePrice ? parseFloat(formData.reservePrice) : undefined,
         auction_duration_hours: listingType === "auction" ? parseInt(formData.duration) * 24 : undefined,
         status: hasBoosts ? "draft" : "active", // Draft if boosts enabled, otherwise publish immediately
+        brand: formData.brand || undefined,
+        model: formData.model || undefined,
+        storage: formData.storage || undefined,
+        ram: formData.ram || undefined,
       };
 
       // Create or update listing
@@ -308,6 +321,16 @@ export function CreateListing({ onBack, onPublish, editingListing }: CreateListi
     });
   };
 
+  // Get filtered brands based on selected category
+  const availableBrands = formData.category
+    ? getBrandsForCategory(formData.category as ElectronicsCategory)
+    : [];
+
+  // Get filtered models based on selected brand
+  const availableModels = formData.brand
+    ? getModelsForBrand(formData.brand)
+    : [];
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -341,34 +364,37 @@ export function CreateListing({ onBack, onPublish, editingListing }: CreateListi
       <main className="max-w-5xl mx-auto px-4 py-8">
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Listing Type Selection */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Listing Format</CardTitle>
-              <CardDescription>Choose how you want to sell your item</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Tabs value={listingType} onValueChange={(v) => setListingType(v as "buy-now" | "auction")}>
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger
-                    value="buy-now"
-                    disabled={isSubmitting}
-                    type="button"
-                    className="data-[state=active]:bg-[#fa6723] data-[state=active]:text-white"
-                  >
-                    Fixed Price
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="auction"
-                    disabled={isSubmitting}
-                    type="button"
-                    className="data-[state=active]:bg-[#fa6723] data-[state=active]:text-white"
-                  >
-                    Auction
-                  </TabsTrigger>
-                </TabsList>
-              </Tabs>
-            </CardContent>
-          </Card>
+          {/* MVP: Hide auction type selector - keep code for future re-enable */}
+          {ENABLE_AUCTIONS && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Listing Format</CardTitle>
+                <CardDescription>Choose how you want to sell your item</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Tabs value={listingType} onValueChange={(v) => setListingType(v as "buy-now" | "auction")}>
+                  <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger
+                      value="buy-now"
+                      disabled={isSubmitting}
+                      type="button"
+                      className="data-[state=active]:bg-[#fa6723] data-[state=active]:text-white"
+                    >
+                      Fixed Price
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="auction"
+                      disabled={isSubmitting}
+                      type="button"
+                      className="data-[state=active]:bg-[#fa6723] data-[state=active]:text-white"
+                    >
+                      Auction
+                    </TabsTrigger>
+                  </TabsList>
+                </Tabs>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Images */}
           <Card>
@@ -458,6 +484,31 @@ export function CreateListing({ onBack, onPublish, editingListing }: CreateListi
                   </Select>
                 </div>
 
+                {/* Brand Dropdown - Show when category is selected */}
+                {formData.category && (
+                  <div className="space-y-2">
+                    <Label htmlFor="brand">Brand</Label>
+                    <Select
+                      value={formData.brand}
+                      onValueChange={(v) => {
+                        updateFormData("brand", v);
+                        updateFormData("model", ""); // Reset model when brand changes
+                      }}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select brand" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {availableBrands.map((brand) => (
+                          <SelectItem key={brand.value} value={brand.value}>
+                            {brand.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+
                 <div className="space-y-2">
                   <Label htmlFor="condition">Condition *</Label>
                   <Select value={formData.condition} onValueChange={(v) => updateFormData("condition", v)}>
@@ -474,6 +525,66 @@ export function CreateListing({ onBack, onPublish, editingListing }: CreateListi
                   </Select>
                 </div>
               </div>
+
+              {/* Model Dropdown - Only show if brand is selected */}
+              {formData.category && formData.brand && (
+                <div className="space-y-2">
+                  <Label htmlFor="model">Model</Label>
+                  <Select value={formData.model} onValueChange={(v) => updateFormData("model", v)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select model" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableModels.map((model) => (
+                        <SelectItem key={model.value} value={model.value}>
+                          {model.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              {/* Storage and RAM - Only show for relevant categories */}
+              {formData.category && (formData.category === "Mobile Phones" ||
+                formData.category === "Tablets & iPads" ||
+                formData.category === "Laptops & Computers") && (
+                <div className="grid sm:grid-cols-2 gap-4">
+                  {/* Storage */}
+                  <div className="space-y-2">
+                    <Label htmlFor="storage">Storage</Label>
+                    <Select value={formData.storage} onValueChange={(v) => updateFormData("storage", v)}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select storage" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {storageOptions.map((opt) => (
+                          <SelectItem key={opt} value={opt}>
+                            {opt}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* RAM */}
+                  <div className="space-y-2">
+                    <Label htmlFor="ram">RAM</Label>
+                    <Select value={formData.ram} onValueChange={(v) => updateFormData("ram", v)}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select RAM" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {ramOptions.map((opt) => (
+                          <SelectItem key={opt} value={opt}>
+                            {opt}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              )}
 
               <div className="space-y-2">
                 <Label htmlFor="description">Description</Label>

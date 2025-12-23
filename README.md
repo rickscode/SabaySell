@@ -1,19 +1,21 @@
 # SabaySell
 
-**Cambodian Online Marketplace** - A free-to-list marketplace enabling locals to sell goods via fixed prices or auctions, with real-time messaging and optional paid boosts.
+**Cambodian Electronics Marketplace** - A frictionless, fixed-price marketplace for buying and selling electronics in Cambodia. Contact sellers instantly via Telegram/WhatsApp.
 
 ---
 
 ## Overview
 
-SabaySell is a full-stack marketplace application built for the Cambodian market, supporting both Khmer and English languages. Users can list items for sale, participate in auctions, communicate with buyers/sellers through real-time chat, and boost their listings for better visibility.
+SabaySell MVP is an electronics-focused marketplace built for the Cambodian market, supporting both Khmer and English languages. Users can list mobile phones, tablets, laptops, and accessories for sale, and connect with buyers instantly through Telegram or WhatsApp.
 
-**Key Differentiators:**
-- Free to list (no upfront costs)
-- Dual-language support (Khmer + English)
-- Real-time auctions with live bidding
-- In-app messaging with Socket.IO
-- Off-platform payments (cash, ABA, Wing)
+**MVP Key Differentiators:**
+- **Electronics-focused**: Mobile Phones, Tablets & iPads, Laptops & Computers, Accessories
+- **Frictionless contact**: Telegram/WhatsApp instant messaging (no in-app chat friction)
+- **Fixed-price only**: Simple, clear pricing (auctions hidden for MVP)
+- **Free to list**: No upfront costs
+- **SEO-optimized**: Target keywords like "buy iphone cambodia", "sell macbook phnom penh"
+- **Dual-language**: Khmer + English support
+- **Off-platform payments**: Cash, ABA, Wing (handled between buyer/seller)
 
 ---
 
@@ -45,29 +47,32 @@ SabaySell is a full-stack marketplace application built for the Cambodian market
 
 ## Features
 
-### Implemented
+### MVP (Currently Live)
 - User authentication (Google/Facebook OAuth)
 - User profiles with reputation system
+- **Electronics-only categories** (Mobile Phones, Tablets, Laptops, Accessories)
+- **Cascading spec dropdowns** (Brand → Model → Storage/RAM)
 - Listing management (create, edit, delete)
-- Fixed price and auction listings
-- Real-time bidding system
+- **Fixed-price listings only** (simple, frictionless)
+- **Telegram/WhatsApp contact** (required, instant buyer-seller connection)
 - Search (full-text, supports Khmer)
-- Category filtering
+- Category filtering with SEO optimization
 - Favorites/Watchlist
-- Real-time messaging (Socket.IO)
+- Boost system (PayPal integration ready, untested)
+
+### Backend Ready (Hidden for MVP)
+**Easily re-enable by setting feature flags to `true`:**
+- Auction & bidding system (`ENABLE_AUCTIONS = false`)
+- Real-time messaging with Socket.IO (`ENABLE_MESSAGING = false`)
 - Unread message counts
-- Boost system (PayPal integration ready)
+- Bid history and live countdown timers
 
-### In Progress
-- Real-time auction updates
-- Notifications system
-- Admin panel
-
-### Planned
-- Push notifications (FCM)
-- SMS notifications
+### Post-MVP (After Traction)
+- Re-enable auctions for advanced sellers
+- Re-enable in-platform messaging as alternative to Telegram/WhatsApp
+- Notifications (Email/SMS/Telegram Bot API)
 - Content moderation
-- Delivery integrations
+- Admin panel
 - Mobile apps (iOS/Android)
 
 ---
@@ -270,7 +275,7 @@ sabaysell/
 | Search | Complete | Full-text with Khmer support |
 | Favorites | Complete | Persisted to database |
 | Messaging Backend | Complete | Database + Server Actions |
-| Real-time Messaging | Complete | Socket.IO implementation |
+| Real-time Messaging | Complete | Socket.IO tested & working |
 | Boost System | Complete | PayPal ready (untested) |
 | Notifications | Not Started | Planned |
 | Admin Panel | Not Started | Planned |

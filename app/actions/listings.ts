@@ -51,6 +51,13 @@ export interface CreateListingData {
   reserve_price?: number
   auction_duration_hours?: number
 
+  // Electronics specifications
+  brand?: string
+  model?: string
+  storage?: string
+  ram?: string
+  specs?: Record<string, any>  // JSONB for additional specs
+
   // Status
   status?: 'draft' | 'active' | 'sold' | 'expired' | 'removed'
 }
@@ -101,6 +108,10 @@ export async function createListing(
       shipping_paid: data.shipping_paid || false,
       local_pickup: data.local_pickup || false,
       shipping_cost: data.shipping_cost || 0,
+      brand: data.brand || null,
+      model: data.model || null,
+      storage: data.storage || null,
+      ram: data.ram || null,
       published_at: data.status === 'active' ? new Date().toISOString() : null
     }
 
@@ -362,6 +373,10 @@ export async function updateListing(
         updateData.published_at = new Date().toISOString()
       }
     }
+    if (data.brand !== undefined) updateData.brand = data.brand
+    if (data.model !== undefined) updateData.model = data.model
+    if (data.storage !== undefined) updateData.storage = data.storage
+    if (data.ram !== undefined) updateData.ram = data.ram
 
     // Update listing
     const { error: updateError } = await (supabase

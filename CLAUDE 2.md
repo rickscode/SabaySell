@@ -6,13 +6,11 @@
 
 ## 🎯 Project Vision
 
-**MVP (Current)**: A frictionless, electronics-focused Cambodian marketplace for fixed-price listings only. Contact via Telegram/WhatsApp (instant, familiar to Cambodians). All payments/deliveries handled off-platform.
-
-**Full Vision**: Expand to include auctions, in-platform messaging, and notifications once marketplace gains traction.
+A free-to-list Cambodian marketplace enabling locals to sell goods via fixed prices or auctions, with in-app chat and optional paid boosts. All payments/deliveries handled off-platform.
 
 ---
 
-## 🚀 Current Status (December 22, 2025)
+## 🚀 Current Status (December 16, 2025)
 
 **Phase**: 3 of 5 (Core Features)
 
@@ -28,24 +26,13 @@
 - ✅ Complete UI (28 pages/views)
 - ✅ Listings CRUD (create, edit, delete)
 - ✅ Homepage with real listings
-- ✅ **Electronics-Only Pivot - COMPLETE** ✅ (Dec 22, 2025)
-  - 4 SEO-optimized categories (Mobile Phones, Tablets & iPads, Laptops & Computers, Accessories)
-  - Database columns added (brand, model, storage, RAM, specs JSONB)
-  - 30+ electronics brands (Apple, Samsung, Huawei, etc.)
-  - 300+ device models (iPhone 16, Galaxy S24, MacBook Pro M4, etc.)
-  - **Cascading dropdowns in Create Listing form** - Brand → Model → Storage/RAM
-  - Dynamic SEO metadata (`lib/seo/metadata.ts`)
-  - Category-specific subcategories
-  - Homepage & create listing updated
-  - i18n translations updated (English + Khmer)
 - ✅ Category filtering & routes
-- ✅ **MVP Simplification - COMPLETE** 🎉 (Dec 22, 2025)
-  - **Fixed-price listings only** (auctions hidden via feature flags)
-  - **Telegram/WhatsApp primary contact** (in-platform messaging hidden)
-  - Contact validation: Telegram OR WhatsApp required for listing creation
-  - Enhanced contact buttons: Larger, brand-colored, prominent placement
-  - All auction/messaging code intact (easy to re-enable via feature flags)
-  - Database tables preserved: `auctions`, `bids`, `threads`, `messages`
+- ✅ **Auction & Bidding System - FULLY TESTED & WORKING** 🎉
+  - RLS security policies configured
+  - Proper price display on homepage
+  - Bid validation and updates
+  - Owner self-bid prevention
+  - Countdown timers
 - ✅ **Favorites/Watchlist - FULLY WORKING** 🎉
   - Database persistence
   - Heart icons fill in when clicked
@@ -57,60 +44,60 @@
   - Uses ILIKE for pattern matching (supports Khmer text)
   - Integrated with homepage search bar
   - Real-time filtering as you type
+- ✅ **Messaging System - READY FOR TESTING** 🎉
+  - Backend fully implemented (Dec 13, 2025)
+  - Query layer: `lib/queries/messages.ts` (5 functions)
+  - Server actions: `app/actions/messages.ts` (4 actions)
+  - Contact Seller dialog creates real threads
+  - Messages inbox shows real database data
+  - Unread count badge working
+  - Self-messaging prevention
+  - Thread deduplication
+  - RLS policies enforced
+  - **Socket.IO Real-Time Delivery - IMPLEMENTED** (Dec 16, 2025)
+    - Socket.IO server on port 3001
+    - Client hook: `lib/hooks/useSocket.ts`
+    - Room-based messaging (thread rooms)
+    - Instant message delivery
+    - Toast notifications
+    - Replaces Supabase Realtime (which didn't work after extensive debugging)
+  - **Testing scheduled for next session**
 - ✅ Boost system (PayPal ready, untested)
-
-**Backend Ready (Hidden for MVP)**:
-- ✅ **Auction & Bidding System** - Fully tested, hidden via `ENABLE_AUCTIONS = false`
-  - RLS security, bid validation, countdown timers
-  - Code intact in: `components/create-listing.tsx`, `product-card.tsx`, `product-detail.tsx`, `app/page.tsx`
-- ✅ **Messaging System** - Complete with Socket.IO, hidden via `ENABLE_MESSAGING = false`
-  - Real-time delivery (< 1 second), toast notifications
-  - Code intact in: `app/messages/page.tsx`, `product-detail.tsx`, `app/page.tsx`
 - ⚠️ i18n (homepage only, other pages TODO)
 
 **Not Working Yet**:
-- ❌ Notifications (intentionally disabled for MVP - no email/SMS infrastructure)
-- ❌ Auctions (hidden for MVP, backend ready to re-enable)
-- ❌ In-platform messaging (hidden for MVP, Socket.IO backend ready to re-enable)
+- ❌ Notifications (not implemented)
+- ❌ Real-time auction updates (Socket.IO not integrated for auctions yet)
 
 ---
 
 ## 📋 Next Priorities
 
-### Tomorrow's Session (Dec 23, 2025) - Pre-Launch Cleanup
+### Immediate (Next Session - December 16, 2025)
+1. **Test Socket.IO Real-Time Messaging** ⏳ PRIORITY
+   - Start both servers: `npm run dev:all`
+   - Test with two browsers (different Google accounts)
+   - Verify instant message delivery (< 1 second)
+   - Check console logs for Socket.IO connection
+   - Verify toast notifications
+   - Test consecutive messages
+   - Test page refresh persistence
+   - Test across thread switching
 
-**📋 FULL PLAN**: See `TOMORROW-CLEANUP.md` for comprehensive checklist
+### Week 1 - After Messaging Tests Pass
+2. **Notifications** (1 day)
+   - Create `app/actions/notifications.ts`
+   - Create `lib/queries/notifications.ts`
+   - Add triggers (outbid, auction ending, new messages)
 
-**Quick Summary**:
-1. **Footer Pages**: Decide keep/remove (12 pages → maybe 4-5 for MVP)
-   - KEEP: Contact Us, About Us, Start Selling
-   - REMOVE: News, Careers, Bidding Help, Resolution Center, Business Sellers
+3. **Socket.IO for Auctions** (1-2 days)
+   - Real-time bid updates
+   - Live countdown timers
+   - Outbid notifications
 
-2. **Codebase Cleanup**: Remove unused files, console.logs, mock data
-
-3. **GitHub**: Create `dev` branch, protect `main` branch
-
-4. **Testing**: Full user flow testing with real phone numbers
-
-5. **Deploy**: Vercel + Supabase production database
-
-**Estimated Time**: 4-6 hours → LAUNCH! 🚀
-
-### MVP Launch Checklist (After Cleanup)
-1. **Testing** - User acceptance testing with real Cambodian sellers
-2. **Performance** - Optimize image loading, lazy loading, caching
-3. **SEO** - Google Search Console setup, sitemap, robots.txt
-4. **Deploy**:
-   - ✅ **Vercel** - Next.js app (FREE tier)
-   - ✅ **Supabase** - Database (already configured)
-   - ❌ **Railway/Render** - Socket.IO server NOT NEEDED for MVP (messaging hidden)
-   - Deploy Socket.IO later when `ENABLE_MESSAGING = true`
-
-### Post-MVP (After Traction)
-1. **Re-enable Auctions** - Set `ENABLE_AUCTIONS = true` in all components
-2. **Re-enable Messaging** - Set `ENABLE_MESSAGING = true` in all components
-3. **Notifications** - Email/SMS/Telegram Bot API for auction outbids and messages
-4. **Fix i18n on all pages** - Complete Khmer translations across all components
+4. **Fix i18n on all pages** (deferred)
+   - Add translation keys to all components
+   - Ensure all pages use `useTranslation()` hook
 
 ---
 
@@ -368,7 +355,7 @@ Fully tested and working:
 
 2. **Hydration fix applied**: Fixed React hydration error by ensuring server and client both start with Khmer language, then load saved preference after hydration.
 
-3. **No real-time auction updates**: Messaging has real-time with Socket.IO ✅. Auction bids still require page refresh. Socket.IO for auctions not yet integrated.
+3. **No real-time updates**: Auction bids and messages require page refresh to see updates. Socket.IO integration needed.
 
 4. **Boost system untested**: PayPal IPN integration complete but never tested end-to-end with real payments.
 
@@ -380,52 +367,18 @@ Fully tested and working:
 - [x] Auction system tested and working
 - [x] Favorites persist to database
 - [x] Search works with Khmer text (ILIKE pattern matching)
-- [x] Messaging backend implemented
-- [x] Messaging system tested and working ✅
-- [x] Socket.IO integrated for real-time messaging ✅
+- [x] Messaging backend implemented (ready for testing)
+- [ ] Messaging system tested and working
 - [ ] Notifications system operational
-- [ ] Socket.IO for auction updates
+- [ ] Socket.IO integrated for live updates
 
 ---
 
-**Last Updated**: December 22, 2025
-**Current Task**: MVP Simplification COMPLETE ✅ | Ready for pre-launch cleanup
-**Status**: 95% ready for launch 🚀 | Fixed-price + Telegram/WhatsApp only | Need: cleanup, footer content, final testing
-**Deployment**:
-- **Vercel** (Next.js app - FREE tier sufficient for MVP)
-- **Supabase** (Database - already cloud-hosted)
-- **Railway/Render** (Socket.IO server - NOT needed until messaging re-enabled)
+**Last Updated**: December 16, 2025
+**Current Task**: Socket.IO real-time messaging implemented! Ready for testing.
+**Status**: Auction, Favorites, Search fully working ✅ | Messaging + Socket.IO implemented ⏳
 
-**Today's Session (Dec 22, 2025) - MVP Simplification**:
-- ✅ **Phase 1: Hidden Auctions** - Set `ENABLE_AUCTIONS = false` across all components
-  - Create Listing: Hidden auction type selector and pricing inputs
-  - Product Card: Hidden countdown timers, bid counts, "Make Offer" buttons
-  - Product Detail: Hidden bidding UI, auction price display, bid history tab
-  - Homepage: Force all listings to display as fixed-price, hidden bidding help page
-- ✅ **Phase 2: Hidden Messaging** - Set `ENABLE_MESSAGING = false` across all components
-  - Homepage: Hidden message icon and unread badge in header
-  - Product Detail: Hidden "Contact Seller" and "Make an Offer" buttons
-  - Messages page: Added redirect to homepage (`app/messages/page.tsx`)
-  - User dropdown: Hidden "Messages" menu item
-- ✅ **Phase 4: Emphasized Telegram/WhatsApp Contact**
-  - Product Detail: Redesigned contact section with prominent Telegram/WhatsApp buttons
-  - Made buttons larger (size="lg"), added brand colors (Telegram blue, WhatsApp green)
-  - Changed labels to "Chat on Telegram" and "Chat on WhatsApp"
-  - **Hidden Call Seller button** - Telegram/WhatsApp only contact
-  - Create Listing: Added validation - Telegram OR WhatsApp required to publish
-- ✅ **Phase 5: Final UI Cleanup**
-  - Homepage: Hidden notifications icon (not implemented yet anyway)
-  - Filters Sidebar: Hidden "Buying Format" filter (fixed-price only)
-- ✅ **Documentation**: Updated CLAUDE.md and README.md to reflect MVP simplification strategy
-- 🎯 **Result**: Ultra-clean, frictionless marketplace - Telegram/WhatsApp contact ONLY, fixed-price ONLY
-
-**Earlier Today (Dec 22, 2025) - Electronics Pivot**:
-- ✅ Completed electronics-only pivot with SEO optimization
-- ✅ Implemented cascading spec dropdowns (Brand → Model → Storage/RAM)
-- ✅ 4 SEO-optimized categories, 30+ brands, 300+ models
-- 🎯 Target keywords: "buy iphone cambodia", "sell ipad phnom penh", "macbook cambodia"
-
-**Previous Session (Dec 16, 2025)**:
+**Today's Session (Dec 16, 2025)**:
 - ✅ Attempted to fix Supabase Realtime (multiple approaches failed)
 - ✅ Pivoted to Socket.IO for reliable real-time messaging
 - ✅ Installed Socket.IO dependencies (socket.io, socket.io-client, concurrently)

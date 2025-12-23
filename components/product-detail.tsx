@@ -33,6 +33,10 @@ import { ProductCard } from "./product-card";
 import { placeBid } from "@/app/actions/auctions";
 import { toast } from "sonner";
 
+// MVP Feature Flags - Set to false to hide features while keeping code intact
+const ENABLE_AUCTIONS = false;
+const ENABLE_MESSAGING = false;
+
 interface ProductDetailProps {
   product: Product;
   onBack: () => void;
@@ -238,7 +242,8 @@ export function ProductDetail({ product, onBack, similarProducts, onContactSelle
 
             {/* Pricing */}
             <div>
-              {auctionData ? (
+              {/* MVP: Hide auction price display */}
+              {ENABLE_AUCTIONS && auctionData ? (
                 <div className="space-y-3">
                   <div>
                     <p className="text-sm text-gray-600">Current bid</p>
@@ -314,7 +319,8 @@ export function ProductDetail({ product, onBack, similarProducts, onContactSelle
 
             {/* Contact & Actions */}
             <div className="space-y-3">
-              {auctionData && !timeLeft.includes('ended') ? (
+              {/* MVP: Hide auction bidding UI and messaging buttons */}
+              {ENABLE_AUCTIONS && auctionData && !timeLeft.includes('ended') ? (
                 <>
                   {/* Bidding UI */}
                   <Card className="p-4 bg-orange-50 border-orange-200">
@@ -353,17 +359,19 @@ export function ProductDetail({ product, onBack, similarProducts, onContactSelle
                     </div>
                   </Card>
 
-                  <Button
-                    variant="outline"
-                    className="w-full"
-                    size="lg"
-                    onClick={() => onContactSeller(product)}
-                  >
-                    <MessageSquare className="w-4 h-4 mr-2" />
-                    Contact Seller
-                  </Button>
+                  {ENABLE_MESSAGING && (
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      size="lg"
+                      onClick={() => onContactSeller(product)}
+                    >
+                      <MessageSquare className="w-4 h-4 mr-2" />
+                      Contact Seller
+                    </Button>
+                  )}
                 </>
-              ) : auctionData ? (
+              ) : ENABLE_AUCTIONS && auctionData ? (
                 <>
                   {/* Auction ended */}
                   <div className="p-4 bg-gray-100 rounded-lg text-center">
@@ -372,26 +380,28 @@ export function ProductDetail({ product, onBack, similarProducts, onContactSelle
                       <p className="text-green-600 font-medium mt-2">Congratulations! You won this auction.</p>
                     )}
                   </div>
-                  <Button
-                    className="w-full bg-[#fa6723] hover:bg-[#e55a1f]"
-                    size="lg"
-                    onClick={() => onContactSeller(product)}
-                  >
-                    <MessageSquare className="w-4 h-4 mr-2" />
-                    Contact Seller
-                  </Button>
+                  {ENABLE_MESSAGING && (
+                    <Button
+                      className="w-full bg-[#fa6723] hover:bg-[#e55a1f]"
+                      size="lg"
+                      onClick={() => onContactSeller(product)}
+                    >
+                      <MessageSquare className="w-4 h-4 mr-2" />
+                      Contact Seller
+                    </Button>
+                  )}
                 </>
-              ) : (
-                <Button 
-                  variant="outline" 
-                  className="w-full" 
+              ) : ENABLE_MESSAGING ? (
+                <Button
+                  variant="outline"
+                  className="w-full"
                   size="lg"
                   onClick={() => onContactSeller(product, "I would like to make an offer for this item.", true)}
                 >
                   <DollarSign className="w-4 h-4 mr-2" />
                   Make an Offer
                 </Button>
-              )}
+              ) : null}
 
               <div className="flex gap-2">
                 <Button
@@ -433,41 +443,54 @@ export function ProductDetail({ product, onBack, similarProducts, onContactSelle
                 <p>• {Math.round(((product.seller?.rating || 0) / 5) * 100)}% positive feedback</p>
                 <p>• {product.seller?.totalSales || 0} items sold</p>
               </div>
-              <div className="grid grid-cols-2 gap-2 mt-3">
-                {/* Row 1: Telegram and WhatsApp */}
-                <Button
-                  variant="outline"
-                  onClick={() => window.open(`https://t.me/${product.seller?.telegram?.replace('@', '')}`, '_blank')}
-                  disabled={!product.seller?.telegram}
-                >
-                  <MessageCircle className="w-4 h-4 mr-2" />
-                  Telegram
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => window.open(`https://wa.me/${product.seller?.whatsapp?.replace(/\s/g, '')}`, '_blank')}
-                  disabled={!product.seller?.whatsapp}
-                >
-                  <MessageCircle className="w-4 h-4 mr-2" />
-                  WhatsApp
-                </Button>
+              {/* MVP: Emphasize Telegram/WhatsApp as primary contact methods */}
+              <div className="space-y-2 mt-3">
+                {/* Primary Contact: Telegram and WhatsApp (larger, prominent) */}
+                <div className="grid grid-cols-2 gap-2">
+                  <Button
+                    size="lg"
+                    className="bg-[#0088cc] hover:bg-[#0077b3] text-white"
+                    onClick={() => window.open(`https://t.me/${product.seller?.telegram?.replace('@', '')}`, '_blank')}
+                    disabled={!product.seller?.telegram}
+                  >
+                    <MessageCircle className="w-5 h-5 mr-2" />
+                    Chat on Telegram
+                  </Button>
+                  <Button
+                    size="lg"
+                    className="bg-[#25D366] hover:bg-[#1ebe57] text-white"
+                    onClick={() => window.open(`https://wa.me/${product.seller?.whatsapp?.replace(/\s/g, '')}`, '_blank')}
+                    disabled={!product.seller?.whatsapp}
+                  >
+                    <MessageCircle className="w-5 h-5 mr-2" />
+                    Chat on WhatsApp
+                  </Button>
+                </div>
 
-                {/* Row 2: Call and Message (in-platform) */}
+                {/* MVP: Hide Call Seller button - Telegram/WhatsApp only */}
+                {/*
                 <Button
                   variant="outline"
+                  className="w-full"
                   onClick={() => window.open(`tel:${product.seller?.phone}`)}
                   disabled={!product.seller?.phone}
                 >
                   <Phone className="w-4 h-4 mr-2" />
-                  Call
+                  Call Seller
                 </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => onContactSeller(product)}
-                >
-                  <MessageSquare className="w-4 h-4 mr-2" />
-                  Message
-                </Button>
+                */}
+
+                {/* MVP: Hide in-platform Message button */}
+                {ENABLE_MESSAGING && (
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => onContactSeller(product)}
+                  >
+                    <MessageSquare className="w-4 h-4 mr-2" />
+                    Message
+                  </Button>
+                )}
               </div>
             </Card>
           </div>
@@ -480,7 +503,8 @@ export function ProductDetail({ product, onBack, similarProducts, onContactSelle
               <TabsTrigger value="description" className="rounded-none data-[state=active]:border-b-2 data-[state=active]:border-[#fa6723]">
                 Description
               </TabsTrigger>
-              {auctionData && (
+              {/* MVP: Hide Bid History tab */}
+              {ENABLE_AUCTIONS && auctionData && (
                 <TabsTrigger value="bids" className="rounded-none data-[state=active]:border-b-2 data-[state=active]:border-[#fa6723]">
                   Bid History ({auctionData.bidHistory?.length || 0})
                 </TabsTrigger>
@@ -519,7 +543,8 @@ export function ProductDetail({ product, onBack, similarProducts, onContactSelle
               </div>
             </TabsContent>
 
-            {auctionData && (
+            {/* MVP: Hide Bid History tab content */}
+            {ENABLE_AUCTIONS && auctionData && (
               <TabsContent value="bids" className="p-6">
                 <div className="space-y-4">
                   {auctionData.bidHistory && auctionData.bidHistory.length > 0 ? (

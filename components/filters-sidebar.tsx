@@ -204,9 +204,10 @@ export function FiltersSidebar({ onClose, isMobile, onFiltersChange, initialFilt
           </div>
         </div>
 
+        {/* MVP: Hide Buying Format filter - fixed price only */}
+        {/*
         <Separator />
 
-        {/* Buying Format */}
         <div>
           <h3 className="mb-3">{t('filters.buying_format')}</h3>
           <div className="space-y-2">
@@ -230,6 +231,7 @@ export function FiltersSidebar({ onClose, isMobile, onFiltersChange, initialFilt
         </div>
 
         <Separator />
+        */}
 
         {/* Location */}
         <div>

@@ -21,20 +21,11 @@
   },
 
   "categories": {
-    "title": "Shop by Category",
-    "electronics": "Electronics",
-    "mobile_phones": "Mobile Phones",
-    "jewellery_watches": "Jewellery and Watches",
-    "home_garden": "Home & Garden",
-    "fashion": "Fashion",
-    "books": "Books",
-    "automobiles": "Automobiles",
-    "toys": "Toys",
-    "tools": "Tools",
-    "sports": "Sports Equipment",
-    "school": "School Equipment",
-    "other": "Other",
-    "more": "More"
+    "title": "Shop Electronics",
+    "phones": "Mobile Phones",
+    "tablets": "Tablets & iPads",
+    "laptops": "Laptops & Computers",
+    "accessories": "Accessories"
   },
 
   "actions": {

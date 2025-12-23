@@ -1,5 +1,9 @@
 "use client";
 
+// MVP Feature Flags - Set to false to hide features while keeping code intact
+const ENABLE_AUCTIONS = false;
+const ENABLE_MESSAGING = false;
+
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
@@ -39,6 +43,8 @@ import {
   GraduationCap,
   LogOut,
   UserCircle,
+  Tablet,
+  Headphones,
 } from "lucide-react";
 import { ProductCard, Product } from "@/components/product-card";
 import { CategoryCard } from "@/components/category-card";
@@ -88,8 +94,25 @@ import type { ListingWithImages } from "@/lib/database.types";
 import { getFavoriteIdsForUser } from "@/lib/queries/favorites";
 import { toggleFavorite } from "@/app/actions/favorites";
 import { getUnreadCount } from "@/lib/queries/messages";
+import { getAllCategories } from "@/lib/constants/categories";
 
-const categories = [
+// Map icon names to Lucide icon components
+const iconMap: Record<string, any> = {
+  Smartphone,
+  Tablet,
+  Laptop,
+  Headphones,
+};
+
+const categoriesConfig = getAllCategories().map(cat => ({
+  nameKey: `categories.${cat.slug}`,
+  icon: iconMap[cat.icon] || Smartphone,
+  slug: cat.slug,
+  name: cat.id
+}));
+
+// Legacy categories array (to be removed after migration)
+const categoriesOld = [
   { nameKey: "categories.electronics", icon: Laptop, count: "12.5K items" },
   { nameKey: "categories.mobile_phones", icon: Smartphone, count: "8.2K items" },
   { nameKey: "categories.jewellery_watches", icon: Watch, count: "4.3K items" },
@@ -108,17 +131,20 @@ const categories = [
 function convertListingToProduct(listing: any, isFavorited: boolean = false): Product {
   const primaryImage = (listing.images as any[])?.find((img: any) => img.is_primary) || (listing.images as any[])?.[0];
 
+  // MVP: When auctions disabled, treat all listings as fixed price
+  const isAuction = ENABLE_AUCTIONS && listing.type === 'auction';
+
   // For auction listings, use current_price from auction table
-  const price = listing.type === 'auction' && listing.auction
+  const price = isAuction && listing.auction
     ? parseFloat(listing.auction.current_price || listing.auction.start_price || '0')
     : (listing.price || 0);
 
   // For auction listings, include bid count and time left
-  const bids = listing.type === 'auction' && listing.auction
+  const bids = isAuction && listing.auction
     ? listing.auction.total_bids
     : undefined;
 
-  const timeLeft = listing.type === 'auction' && listing.auction?.ends_at
+  const timeLeft = isAuction && listing.auction?.ends_at
     ? calculateTimeLeft(listing.auction.ends_at)
     : undefined;
 
@@ -130,8 +156,8 @@ function convertListingToProduct(listing: any, isFavorited: boolean = false): Pr
     condition: listing.condition ? listing.condition.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) : "New",
     shipping: "Free shipping", // TODO: Add shipping info to listing
     location: listing.location || "Cambodia",
-    buyNow: listing.type === 'fixed',
-    auction: listing.type === 'auction',
+    buyNow: !isAuction,  // MVP: All listings show "Buy Now" when auctions disabled
+    auction: isAuction,  // MVP: Will always be false when ENABLE_AUCTIONS is false
     bids,
     timeLeft,
     isFavorited,
@@ -210,6 +236,9 @@ export default function App() {
   // Messages state
   const [unreadCount, setUnreadCount] = useState<number>(0);
 
+  // Category counts state
+  const [categoryCounts, setCategoryCounts] = useState<Record<string, number>>({});
+
   // Filter state
   const [filters, setFilters] = useState<FilterState>({
     conditions: [],
@@ -280,6 +309,34 @@ export default function App() {
 
     loadUnreadCount();
   }, [user]);
+
+  // Load category counts on mount
+  useEffect(() => {
+    async function loadCategoryCounts() {
+      try {
+        const { createClient } = await import("@/lib/supabase");
+        const supabase = createClient();
+
+        // Get counts for each category
+        const counts: Record<string, number> = {};
+        for (const cat of categoriesConfig) {
+          const { count } = await supabase
+            .from('listings')
+            .select('*', { count: 'exact', head: true })
+            .eq('category', cat.name)
+            .eq('status', 'active');
+
+          counts[cat.slug] = count || 0;
+        }
+
+        setCategoryCounts(counts);
+      } catch (error) {
+        console.error('Error loading category counts:', error);
+      }
+    }
+
+    loadCategoryCounts();
+  }, []);
 
   // Load listings on mount and when filters or search query change
   useEffect(() => {
@@ -551,7 +608,8 @@ export default function App() {
     );
   }
 
-  if (currentView === "messages") {
+  // MVP: Hide messages inbox
+  if (ENABLE_MESSAGING && currentView === "messages") {
     return <MessagesInbox onBack={handleBackToHome} />;
   }
 
@@ -625,7 +683,8 @@ export default function App() {
     return <RegistrationPage onNavigate={(view) => setCurrentView(view as View)} />;
   }
 
-  if (currentView === "bidding-help") {
+  // MVP: Hide bidding help page
+  if (ENABLE_AUCTIONS && currentView === "bidding-help") {
     return <BiddingHelpPage onNavigate={(view) => setCurrentView(view as View)} />;
   }
 
@@ -717,23 +776,27 @@ export default function App() {
               >
                 <DollarSign className="w-5 h-5" />
               </Button>
-              
-              <NotificationsDropdown />
-              
-              <Button
-                variant="ghost"
-                size="icon"
-                className="relative"
-                onClick={() => router.push("/messages")}
-                title="Messages"
-              >
-                <MessageCircle className="w-5 h-5" />
-                {unreadCount > 0 && (
-                  <BadgeComponent className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-[#fa6723]">
-                    {unreadCount}
-                  </BadgeComponent>
-                )}
-              </Button>
+
+              {/* MVP: Hide notifications - not implemented yet */}
+              {/* <NotificationsDropdown /> */}
+
+              {/* MVP: Hide message icon and unread badge */}
+              {ENABLE_MESSAGING && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="relative"
+                  onClick={() => router.push("/messages")}
+                  title="Messages"
+                >
+                  <MessageCircle className="w-5 h-5" />
+                  {unreadCount > 0 && (
+                    <BadgeComponent className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-[#fa6723]">
+                      {unreadCount}
+                    </BadgeComponent>
+                  )}
+                </Button>
+              )}
               <Button
                 variant="ghost"
                 size="icon"
@@ -786,10 +849,13 @@ export default function App() {
                       <Package className="mr-2 h-4 w-4" />
                       <span>{t('header.my_listings')}</span>
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => router.push('/messages')}>
-                      <MessageCircle className="mr-2 h-4 w-4" />
-                      <span>{t('header.messages')}</span>
-                    </DropdownMenuItem>
+                    {/* MVP: Hide messages menu item */}
+                    {ENABLE_MESSAGING && (
+                      <DropdownMenuItem onClick={() => router.push('/messages')}>
+                        <MessageCircle className="mr-2 h-4 w-4" />
+                        <span>{t('header.messages')}</span>
+                      </DropdownMenuItem>
+                    )}
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={handleCreateListing}>
                       <Plus className="mr-2 h-4 w-4" />
@@ -820,7 +886,7 @@ export default function App() {
 
           {/* Categories Navigation - Mobile */}
           <div className="mt-3 flex gap-2 overflow-x-auto pb-2 sm:hidden scrollbar-hide">
-            {categories.slice(0, 4).map((category) => (
+            {categoriesConfig.map((category) => (
               <Button
                 key={category.nameKey}
                 variant="outline"
@@ -843,16 +909,21 @@ export default function App() {
       <section className="hidden sm:block bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 py-6">
           <h2 className="mb-4">{t('categories.title')}</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-            {categories.map((category) => (
-              <div key={category.nameKey} onClick={() => handleCategoryClick(t(category.nameKey))}>
-                <CategoryCard
-                  nameKey={category.nameKey}
-                  icon={category.icon}
-                  count={category.count}
-                />
-              </div>
-            ))}
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {categoriesConfig.map((category) => {
+              const count = categoryCounts[category.slug];
+              const countText = count !== undefined ? `${count.toLocaleString()} items` : 'Loading...';
+
+              return (
+                <div key={category.nameKey} onClick={() => handleCategoryClick(t(category.nameKey))}>
+                  <CategoryCard
+                    nameKey={category.nameKey}
+                    icon={category.icon}
+                    count={countText}
+                  />
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -945,12 +1016,15 @@ export default function App() {
                 >
                   {t('footer.buy.browse')}
                 </li>
-                <li
-                  className="hover:text-[#fa6723] cursor-pointer"
-                  onClick={() => setCurrentView("bidding-help")}
-                >
-                  {t('footer.buy.help')}
-                </li>
+                {/* MVP: Hide bidding help link */}
+                {ENABLE_AUCTIONS && (
+                  <li
+                    className="hover:text-[#fa6723] cursor-pointer"
+                    onClick={() => setCurrentView("bidding-help")}
+                  >
+                    {t('footer.buy.help')}
+                  </li>
+                )}
                 <li
                   className="hover:text-[#fa6723] cursor-pointer"
                   onClick={() => setCurrentView("stores")}

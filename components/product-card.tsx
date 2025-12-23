@@ -5,6 +5,9 @@ import { Badge } from "./ui/badge";
 import { Heart, ShoppingCart, DollarSign, Star, Flame } from "lucide-react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 
+// MVP Feature Flags - Set to false to hide features while keeping code intact
+const ENABLE_AUCTIONS = false;
+
 export interface Product {
   id: string;
   title: string;
@@ -92,7 +95,8 @@ export function ProductCard({ product, onSaveToWatchlist, onBuyNow, onMakeOffer,
           </Badge>
         )}
 
-        {product.auction && product.timeLeft && (
+        {/* MVP: Hide auction countdown timer */}
+        {ENABLE_AUCTIONS && product.auction && product.timeLeft && (
           <Badge className="absolute bottom-2 left-2 bg-[#fa6723] hover:bg-[#e55a1f]">
             {product.timeLeft}
           </Badge>
@@ -113,7 +117,8 @@ export function ProductCard({ product, onSaveToWatchlist, onBuyNow, onMakeOffer,
           )}
         </div>
 
-        {product.bids !== undefined && (
+        {/* MVP: Hide bid count */}
+        {ENABLE_AUCTIONS && product.bids !== undefined && (
           <p className="text-sm text-gray-600 mb-1">{product.bids} bids</p>
         )}
         
@@ -141,8 +146,9 @@ export function ProductCard({ product, onSaveToWatchlist, onBuyNow, onMakeOffer,
           </button>
         )}
 
-        {product.auction && (
-          <button 
+        {/* MVP: Hide "Make Offer" button for auctions */}
+        {ENABLE_AUCTIONS && product.auction && (
+          <button
             className="w-full mt-3 flex items-center justify-center gap-2 bg-[#fa6723] text-white py-2 px-4 rounded-md hover:bg-[#e55a1f] transition-colors"
             onClick={(e) => {
               e.stopPropagation();

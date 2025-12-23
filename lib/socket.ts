@@ -10,6 +10,7 @@ export type ServerToClientEvents = {
 export type ClientToServerEvents = {
   'thread:join': (threadId: string) => void;
   'thread:leave': (threadId: string) => void;
+  'server:broadcast': (data: { threadId: string; message: MessageWithSender }) => void;
 };
 
 let io: SocketIOServer<ClientToServerEvents, ServerToClientEvents>;
@@ -37,6 +38,13 @@ export const getSocketIO = () => {
         console.log(`🔴 Socket ${socket.id} left thread:${threadId}`);
       });
 
+      // Server-side broadcast from Next.js server actions
+      socket.on('server:broadcast', (data: { threadId: string; message: MessageWithSender }) => {
+        console.log(`📡 Server broadcast request for thread:${data.threadId}`);
+        io.to(`thread:${data.threadId}`).emit('message:new', data.message);
+        console.log(`📤 Broadcasted message to thread:${data.threadId}`, data.message.id);
+      });
+
       socket.on('disconnect', () => {
         console.log('🔴 Socket.IO client disconnected:', socket.id);
       });
@@ -50,11 +58,13 @@ export const getSocketIO = () => {
   return io;
 };
 
+// For backward compatibility - but this should not be used anymore
+// Use lib/socket-emitter.ts from server actions instead
 export const emitNewMessage = (threadId: string, message: MessageWithSender) => {
-  const io = getSocketIO();
-  io.to(`thread:${threadId}`).emit('message:new', message);
-  console.log(`📤 Emitted message to thread:${threadId}`, message.id);
+  console.warn('⚠️ Direct emitNewMessage is deprecated. Socket.IO server should be standalone.');
+  // Don't call getSocketIO() here - will cause EADDRINUSE error
 };
 
-// Initialize Socket.IO server when this module is loaded
+// Initialize server when this file is run as standalone server
+// This is called by: npm run socket
 getSocketIO();

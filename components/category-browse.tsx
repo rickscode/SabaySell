@@ -14,6 +14,7 @@ import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
 import { ArrowLeft, SlidersHorizontal, Grid3x3, List } from "lucide-react";
 import { Product, ProductCard } from "./product-card";
 import { FiltersSidebar } from "./filters-sidebar";
+import { getCategoryBySlug } from "@/lib/constants/categories";
 
 interface CategoryBrowseProps {
   category: string;
@@ -24,17 +25,6 @@ interface CategoryBrowseProps {
   onBuyNow?: (product: Product) => void;
   onMakeOffer?: (product: Product) => void;
 }
-
-const subcategories: Record<string, string[]> = {
-  Electronics: ["Laptops", "Desktops", "Tablets", "Components", "Accessories"],
-  "Mobile Phones": ["Smartphones", "Feature Phones", "Accessories", "Parts"],
-  Cameras: ["DSLR", "Mirrorless", "Point & Shoot", "Lenses", "Accessories"],
-  Audio: ["Headphones", "Speakers", "Amplifiers", "Microphones", "DJ Equipment"],
-  Watches: ["Smart Watches", "Luxury Watches", "Sport Watches", "Vintage", "Accessories"],
-  "Home & Garden": ["Furniture", "Decor", "Kitchen", "Garden", "Storage"],
-  Fashion: ["Clothing", "Shoes", "Bags", "Accessories", "Jewelry"],
-  Books: ["Fiction", "Non-Fiction", "Educational", "Comics", "Rare Books"],
-};
 
 export function CategoryBrowse({
   category,
@@ -49,7 +39,21 @@ export function CategoryBrowse({
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [selectedSubcategory, setSelectedSubcategory] = useState<string>("all");
 
-  const categorySubcategories = subcategories[category] || [];
+  // Map category name/slug to get subcategories from electronics categories
+  const categorySlugMap: Record<string, string> = {
+    "Mobile Phones": "phones",
+    "Tablets & iPads": "tablets",
+    "Laptops & Computers": "laptops",
+    "Accessories": "accessories",
+    "phones": "phones",
+    "tablets": "tablets",
+    "laptops": "laptops",
+    "accessories": "accessories",
+  };
+
+  const categorySlug = categorySlugMap[category] || category.toLowerCase();
+  const categoryConfig = getCategoryBySlug(categorySlug);
+  const categorySubcategories = categoryConfig?.subcategories || [];
 
   return (
     <div className="min-h-screen bg-gray-50">

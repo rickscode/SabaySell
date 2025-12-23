@@ -9,7 +9,7 @@ import { revalidatePath } from 'next/cache'
 import { createServerClient } from '@/lib/supabase'
 import { findOrCreateThread } from '@/lib/queries/messages'
 import type { MessageInsert } from '@/lib/database.types'
-import { emitNewMessage } from '@/lib/socket'
+import { emitNewMessage } from '@/lib/socket-emitter'
 
 export interface SendMessageResult {
   success: boolean
@@ -151,7 +151,7 @@ export async function sendMessage(
           sender
         };
         console.log('🔵 Emitting Socket.IO event...');
-        emitNewMessage(threadId, messageWithSender);
+        await emitNewMessage(threadId, messageWithSender);
         console.log('✅ Socket.IO event emitted');
       } else {
         console.error('⚠️ Could not fetch sender info for Socket.IO');
