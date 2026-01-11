@@ -20,9 +20,9 @@ export const ELECTRONICS_CATEGORIES: Record<ElectronicsCategory, CategoryConfig>
     id: "Mobile Phones",
     slug: "phones",
     icon: "Smartphone",
-    seoTitle: "Buy & Sell iPhone, Samsung Phones in Cambodia | SabaySell",
-    seoDescription: "Buy & sell new & used iPhones, Samsung Galaxy, Huawei phones in Cambodia. Best prices in Phnom Penh. iPhone 15, Samsung S24. Free listings.",
-    seoKeywords: ["buy iphone cambodia", "sell iphone phnom penh", "samsung phone cambodia", "sell my phone cambodia", "buy smartphone phnom penh"],
+    seoTitle: "Buy & Sell iPhone, Samsung Phones | Marketplace Template",
+    seoDescription: "Buy & sell new & used iPhones, Samsung Galaxy, Huawei phones. iPhone 15, Samsung S24, and more. Free listings.",
+    seoKeywords: ["buy iphone", "sell iphone", "samsung phone", "sell my phone", "buy smartphone"],
     subcategories: ["iPhones", "Samsung Galaxy", "Huawei", "Oppo & Vivo", "Feature Phones"],
     enabled: true
   },
@@ -30,9 +30,9 @@ export const ELECTRONICS_CATEGORIES: Record<ElectronicsCategory, CategoryConfig>
     id: "Tablets & iPads",
     slug: "tablets",
     icon: "Tablet",
-    seoTitle: "Buy & Sell iPad, Tablets in Cambodia | SabaySell",
-    seoDescription: "Buy & sell new & used iPads, Samsung tablets in Cambodia. iPad Pro, iPad Air, Galaxy Tab. Best prices in Phnom Penh, Siem Reap. Free listings.",
-    seoKeywords: ["buy ipad cambodia", "sell ipad phnom penh", "buy tablet phnom penh", "sell my ipad cambodia", "ipad price cambodia"],
+    seoTitle: "Buy & Sell iPad, Tablets | Marketplace Template",
+    seoDescription: "Buy & sell new & used iPads, Samsung tablets. iPad Pro, iPad Air, Galaxy Tab. Free listings.",
+    seoKeywords: ["buy ipad", "sell ipad", "buy tablet", "sell my ipad", "ipad price"],
     subcategories: ["iPads", "Samsung Galaxy Tabs", "Android Tablets", "E-Readers"],
     enabled: true
   },
@@ -40,21 +40,21 @@ export const ELECTRONICS_CATEGORIES: Record<ElectronicsCategory, CategoryConfig>
     id: "Laptops & Computers",
     slug: "laptops",
     icon: "Laptop",
-    seoTitle: "Buy & Sell MacBook, Gaming Laptops, PCs in Cambodia | SabaySell",
-    seoDescription: "Buy & sell new & used MacBooks, gaming laptops, business laptops in Cambodia. Dell, HP, Asus, Lenovo. Best prices in Phnom Penh. Free listings.",
-    seoKeywords: ["buy macbook cambodia", "sell macbook phnom penh", "gaming laptop cambodia", "sell my laptop cambodia", "laptop price phnom penh"],
+    seoTitle: "Buy & Sell MacBook, Gaming Laptops, PCs | Marketplace Template",
+    seoDescription: "Buy & sell new & used MacBooks, gaming laptops, business laptops. Dell, HP, Asus, Lenovo. Free listings.",
+    seoKeywords: ["buy macbook", "sell macbook", "gaming laptop", "sell my laptop", "laptop price"],
     subcategories: ["MacBooks", "Gaming Laptops", "Business Laptops", "Desktop PCs", "Components"],
-    enabled: false
+    enabled: true
   },
   "Accessories": {
     id: "Accessories",
     slug: "accessories",
     icon: "Headphones",
-    seoTitle: "Buy & Sell Phone Cases, Chargers, Electronics Accessories Cambodia | SabaySell",
-    seoDescription: "Buy & sell phone cases, chargers, cables, headphones, power banks in Cambodia. iPhone accessories, Samsung accessories. Free listings.",
-    seoKeywords: ["phone accessories cambodia", "sell phone accessories phnom penh", "iphone case cambodia", "charger phnom penh"],
+    seoTitle: "Buy & Sell Phone Cases, Chargers, Electronics Accessories | Marketplace Template",
+    seoDescription: "Buy & sell phone cases, chargers, cables, headphones, power banks. iPhone accessories, Samsung accessories. Free listings.",
+    seoKeywords: ["phone accessories", "sell phone accessories", "iphone case", "charger"],
     subcategories: ["Cases & Covers", "Chargers & Cables", "Headphones & Earbuds", "Power Banks", "Smartwatches"],
-    enabled: false
+    enabled: true
   }
 };
 

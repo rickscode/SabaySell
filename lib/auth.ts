@@ -26,9 +26,10 @@ export async function signInWithGoogle() {
 
 /**
  * Sign in with Facebook
- * @note Currently hidden in UI - Facebook app deleted. Will re-enable when new Facebook app is created.
- * @see app/auth/login/page.tsx - handleFacebookLogin commented out
- * @see app/auth/register/page.tsx - handleFacebookSignUp commented out
+ * @note Requires Facebook OAuth app configuration in Supabase dashboard
+ * @see docs/CONFIGURATION.md for setup instructions
+ * @see app/auth/login/page.tsx - handleFacebookLogin
+ * @see app/auth/register/page.tsx - handleFacebookSignUp
  */
 export async function signInWithFacebook() {
   const supabase = createClient()

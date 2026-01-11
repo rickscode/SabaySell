@@ -1,7 +1,25 @@
 {
-  "name": "sabaysell",
-  "version": "0.1.0",
-  "private": true,
+  "name": "nextjs-marketplace-template",
+  "version": "1.0.0",
+  "description": "Production-ready full-stack marketplace template with auctions, real-time messaging, and multi-auth built with Next.js 15, Supabase, and TypeScript",
+  "keywords": [
+    "marketplace",
+    "nextjs",
+    "supabase",
+    "template",
+    "ecommerce",
+    "auction",
+    "real-time",
+    "typescript",
+    "tailwindcss",
+    "shadcn-ui"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/nextjs-marketplace-template"
+  },
+  "author": "Your Name",
   "scripts": {
     "dev": "NODE_OPTIONS='--max-old-space-size=8192' next dev",
     "socket": "node -r @swc-node/register lib/socket.ts",

@@ -81,20 +81,14 @@ export function MessagesInbox({ threads, currentUserId }: MessagesInboxProps) {
 
   useEffect(() => {
     if (!selectedThreadId || !socket) {
-      console.log('🟢 SOCKET.IO: No selected thread or socket, skipping subscription');
       return;
     }
 
-    console.log('🟢 SOCKET.IO: Joining thread:', selectedThreadId);
     socket.emit('thread:join', selectedThreadId);
 
     const handleNewMessage = (message: MessageWithSender) => {
-      console.log('📨 SOCKET.IO: Received new message:', message);
-
       // Only update if message is from another user (avoid duplicates from own sends)
       if (message.sender_id !== currentUserId) {
-        console.log('📨 SOCKET.IO: Message from other user, processing...');
-
         // Add message to local state
         setLocalThreads((prev) =>
           prev.map((thread) => {
@@ -114,8 +108,6 @@ export function MessagesInbox({ threads, currentUserId }: MessagesInboxProps) {
 
         // Mark as read immediately since user is viewing this thread
         markMessagesAsRead(selectedThreadId);
-      } else {
-        console.log('📨 SOCKET.IO: Message from self, ignoring');
       }
     };
 
@@ -123,7 +115,6 @@ export function MessagesInbox({ threads, currentUserId }: MessagesInboxProps) {
 
     // Cleanup on unmount or thread change
     return () => {
-      console.log('🔴 SOCKET.IO: Leaving thread:', selectedThreadId);
       socket.emit('thread:leave', selectedThreadId);
       socket.off('message:new', handleNewMessage);
     };

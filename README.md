@@ -1,245 +1,163 @@
-# SabaySell
+# Next.js Marketplace Template
 
-**Cambodian Electronics Marketplace** - A frictionless, fixed-price marketplace for buying and selling electronics in Cambodia. Contact sellers instantly via Telegram/WhatsApp.
+A production-ready, full-stack marketplace template with auctions, real-time messaging, and multi-auth. Built with Next.js 15, Supabase, and TypeScript.
 
----
-
-## Overview
-
-SabaySell MVP is an electronics-focused marketplace built for the Cambodian market, supporting both Khmer and English languages. Users can list mobile phones and tablets for sale, and connect with buyers instantly through Telegram or WhatsApp. Following Peter Thiel's "Start Small and Monopolize" strategy, we focus on a narrow niche to dominate before expanding.
-
-**MVP Key Differentiators:**
-- **Ultra-focused niche**: Mobile Phones & Tablets only (Laptops & Accessories hidden for future expansion)
-- **Frictionless contact**: Telegram/WhatsApp instant messaging (no in-app chat friction)
-- **Fixed-price only**: Simple, clear pricing (auctions hidden for MVP)
-- **Free to list**: No upfront costs
-- **SEO-optimized**: 100% focus on mobile device keywords like "buy iphone cambodia", "buy ipad phnom penh"
-- **Dual-language**: Khmer + English support
-- **Off-platform payments**: Cash, ABA, Wing (handled between buyer/seller)
-
----
-
-## Tech Stack
-
-### Frontend
-- **Next.js 15.5.6** (App Router) - Full-stack React framework
-- **React 19.2.0** - UI library
-- **TypeScript 5.9.3** - Type safety
-- **Tailwind CSS 3.4.18** - Styling
-- **shadcn/ui** - Component library (Radix UI primitives)
-- **i18next** - Internationalization (Khmer/English)
-
-### Backend
-- **Next.js Server Actions** - Server-side functions
-- **Socket.IO 4.8.1** - Real-time messaging (separate server on port 3001)
-- **Supabase Auth** - Authentication (Google/Facebook OAuth)
-
-### Database
-- **PostgreSQL** (via Supabase)
-- **Supabase JS Client 2.74.0** - Database operations
-- **Row Level Security (RLS)** - Database security
-- **pg_trgm** - Full-text search (Khmer + English)
-
-### Storage
-- **Supabase Storage** - Image uploads (product images, avatars)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ---
 
 ## Features
 
-### MVP (Currently Live)
-- User authentication (Google/Facebook OAuth)
+### Core Marketplace
+- User authentication (Google/Facebook OAuth via Supabase Auth)
 - User profiles with reputation system
-- **2-category niche focus** (Mobile Phones & Tablets only - applying Peter Thiel's "Start Small and Monopolize")
-- **Cascading spec dropdowns** (Brand → Model → Storage/RAM)
 - Listing management (create, edit, delete)
-- **Fixed-price listings only** (simple, frictionless)
-- **Telegram/WhatsApp contact** (required, instant buyer-seller connection)
-- Search (full-text, supports Khmer)
-- Category filtering with SEO optimization
-- Favorites/Watchlist
-- Boost system (PayPal integration ready, untested)
+- Both fixed-price and auction listings
+- Category-based browsing with SEO optimization
+- Full-text search (multi-language support included)
+- Favorites/Watchlist functionality
+- Image uploads with Supabase Storage
 
-### Backend Ready (Hidden for MVP)
-**Easily re-enable by setting feature flags/visibility:**
-- Auction & bidding system (`ENABLE_AUCTIONS = false`)
-- Real-time messaging with Socket.IO (`ENABLE_MESSAGING = false`)
-- Laptops & Computers category (`enabled: false` in categories config)
-- Accessories category (`enabled: false` in categories config)
-- Unread message counts
-- Bid history and live countdown timers
+### Advanced Features
+- **Real-time Auctions** - Live bidding with countdown timers
+- **Real-time Messaging** - Socket.IO for instant buyer-seller communication
+- **Boost System** - PayPal integration for promoted listings
+- **i18n Support** - Built-in internationalization (English + Khmer example)
+- **Progressive Enhancement** - Feature flags to toggle functionality
+- **Row Level Security** - Database-level security policies
 
-### Post-MVP (After Traction)
-- Re-enable auctions for advanced sellers
-- Re-enable in-platform messaging as alternative to Telegram/WhatsApp
-- Notifications (Email/SMS/Telegram Bot API)
-- Content moderation
-- Admin panel
-- Mobile apps (iOS/Android)
+### Built for Customization
+- Centralized configuration (`lib/config/branding.ts`)
+- Electronics categories as example (easily customizable)
+- Clean, well-documented codebase
+- TypeScript throughout for type safety
+- shadcn/ui components for consistent design
 
 ---
 
-## Architecture
+## Tech Stack
 
-```
-┌─────────────────────────────────────────────────┐
-│           Next.js (localhost:3000)              │
-│  ┌──────────────────┐  ┌────────────────────┐  │
-│  │   Frontend (UI)  │  │  Backend (Server)  │  │
-│  │                  │  │                    │  │
-│  │  - React Pages   │  │  - Server Actions  │  │
-│  │  - Components    │  │  - API Routes      │  │
-│  │  - Client Hooks  │  │  - Middleware      │  │
-│  └──────────────────┘  └────────────────────┘  │
-└─────────────────────────────────────────────────┘
-                    │
-        ┌───────────┼───────────┐
-        │           │           │
-        ▼           ▼           ▼
-  ┌──────────┐  ┌─────────┐  ┌──────────────┐
-  │ Supabase │  │Socket.IO│  │   Supabase   │
-  │ Database │  │  Server │  │   Storage    │
-  │   (DB)   │  │ (port   │  │   (Images)   │
-  │          │  │  3001)  │  │              │
-  └──────────┘  └─────────┘  └──────────────┘
-```
+**Frontend:**
+- Next.js 15 (App Router)
+- React 19
+- TypeScript 5
+- Tailwind CSS
+- shadcn/ui (Radix UI)
+- i18next
 
-**Data Flow:**
-- User actions → Server Actions → Supabase DB
-- Real-time messages → Socket.IO → All connected clients
-- Authentication → Supabase Auth → RLS policies
+**Backend:**
+- Next.js Server Actions
+- Socket.IO (real-time messaging)
+- Supabase Auth
+- PostgreSQL (Supabase)
+
+**Features:**
+- Row Level Security (RLS)
+- Full-text search (pg_trgm)
+- OAuth authentication
+- Real-time updates
 
 ---
 
-## Prerequisites
+## Quick Start
 
-- **Node.js** 18+ (with npm)
-- **Supabase Account** (free tier works)
-- **Google OAuth App** (for authentication)
-- **Facebook OAuth App** (for authentication)
+### Prerequisites
+- Node.js 18+
+- Supabase account (free tier works)
+- OAuth apps (Google/Facebook)
 
----
-
-## Installation & Setup
-
-### 1. Clone the Repository
+### 1. Clone & Install
 ```bash
-git clone https://github.com/yourusername/sabaysell.git
-cd sabaysell
-```
-
-### 2. Install Dependencies
-```bash
+git clone https://github.com/yourusername/nextjs-marketplace-template.git
+cd nextjs-marketplace-template
 npm install
 ```
 
-### 3. Environment Variables
-Create `.env.local` in the root directory:
-
+### 2. Configure Environment
+Create `.env.local`:
 ```env
-# Supabase Configuration
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
-
-# Socket.IO (for real-time messaging)
 NEXT_PUBLIC_SOCKET_URL=http://localhost:3001
-SOCKET_IO_PORT=3001
-
-# App Configuration
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 NODE_ENV=development
 ```
 
-### 4. Database Setup
-Run migrations in your Supabase project:
-
-**Option 1: Using Supabase CLI**
+### 3. Setup Database
+Run migrations in Supabase:
 ```bash
+# Using Supabase CLI
 supabase link --project-ref your-project-ref
 supabase db push
+
+# Or copy SQL from supabase/migrations/ to Supabase SQL Editor
 ```
 
-**Option 2: Manual (Supabase Dashboard)**
-1. Go to SQL Editor in Supabase Dashboard
-2. Copy contents of `supabase/migrations/*.sql`
-3. Execute in order
+### 4. Configure OAuth
+Set up Google and Facebook OAuth in Supabase Dashboard → Authentication → Providers
 
-### 5. Configure OAuth
-1. **Google OAuth:**
-   - Go to Google Cloud Console
-   - Create OAuth 2.0 credentials
-   - Add to Supabase Dashboard → Authentication → Providers
+### 5. Run Development Server
+```bash
+npm run dev:all   # Starts both Next.js (3000) and Socket.IO (3001)
+```
 
-2. **Facebook OAuth:**
-   - Go to Facebook Developers
-   - Create app and get App ID/Secret
-   - Add to Supabase Dashboard → Authentication → Providers
+Visit http://localhost:3000
 
 ---
 
-## Development
+## Customization
 
-### Start Development Servers
-```bash
-# Start both Next.js and Socket.IO servers (RECOMMENDED)
-npm run dev:all
-
-# Or start separately:
-npm run dev      # Next.js only (localhost:3000)
-npm run socket   # Socket.IO only (localhost:3001)
+### 1. Branding
+Edit `lib/config/branding.ts`:
+```typescript
+export const SITE_CONFIG = {
+  name: "Your Marketplace Name",
+  tagline: "Your tagline here",
+  currency: "USD",
+  // ... more settings
+}
 ```
 
-### Other Commands
-```bash
-npm run build       # Build for production
-npm run start       # Start production server
-npm run lint        # Run ESLint
-npm run test:db     # Test database connection
+### 2. Categories
+Edit `lib/constants/categories.ts` to add your own categories. Current template uses electronics as an example.
+
+### 3. Feature Flags
+Toggle features in components or centralize in config:
+```typescript
+const ENABLE_AUCTIONS = true;
+const ENABLE_MESSAGING = true;
 ```
 
-### Access the Application
-- **Web App**: http://localhost:3000
-- **Socket.IO**: http://localhost:3001
+### 4. Styling
+- Global styles: `app/globals.css`
+- Theme colors: `tailwind.config.ts`
+- shadcn/ui components: `components/ui/`
 
 ---
 
 ## Project Structure
 
 ```
-sabaysell/
 ├── app/                      # Next.js app directory
 │   ├── actions/              # Server actions
-│   │   ├── messages.ts       # Messaging logic
-│   │   ├── auctions.ts       # Auction logic
-│   │   └── favorites.ts      # Favorites logic
 │   ├── auth/                 # Authentication pages
-│   ├── messages/             # Messages page
-│   ├── listings/             # Listings pages
+│   ├── api/                  # API routes
+│   ├── messages/             # Messaging UI
 │   └── page.tsx              # Homepage
-│
 ├── components/               # React components
 │   ├── ui/                   # shadcn/ui components
-│   ├── messages-inbox.tsx    # Messages UI
-│   └── ...
-│
-├── lib/                      # Utilities and helpers
-│   ├── supabase.ts           # Supabase client
-│   ├── socket.ts             # Socket.IO server
-│   ├── database.types.ts     # TypeScript types
+│   └── ...                   # Feature components
+├── lib/                      # Utilities
+│   ├── config/               # Site configuration
+│   ├── constants/            # Categories, brands, etc.
 │   ├── hooks/                # React hooks
-│   │   └── useSocket.ts      # Socket.IO client hook
-│   └── queries/              # Database queries
-│       ├── messages.ts
-│       ├── listings.ts
-│       └── ...
-│
+│   ├── queries/              # Database queries
+│   ├── supabase.ts           # Supabase client
+│   └── socket.ts             # Socket.IO server
 ├── supabase/
-│   └── migrations/           # Database migrations
-│
+│   └── migrations/           # Database schema
 ├── public/                   # Static assets
-├── .env.local                # Environment variables (not in git)
-├── middleware.ts             # Next.js middleware (auth)
 └── package.json
 ```
 
@@ -247,127 +165,98 @@ sabaysell/
 
 ## Database Schema
 
-**10 Tables:**
-- `users` - User profiles with reputation
-- `listings` - Product listings (fixed price + auction)
+10 tables with Row Level Security:
+- `users` - User profiles
+- `listings` - Products (fixed-price + auction)
 - `images` - Product images
-- `auctions` - Auction data and current bids
+- `auctions` - Auction metadata
 - `bids` - Bid history
-- `threads` - Message thread metadata
+- `threads` - Message threads
 - `messages` - Chat messages
-- `boosts` - Paid listing promotions
-- `transactions` - Financial records
-- `reports` - Content moderation reports
+- `boosts` - Promoted listings
+- `transactions` - Payment records
+- `reports` - Moderation
 
-**Key Features:**
-- Row Level Security (RLS) on all tables
-- Full-text search with pg_trgm
-- Automatic timestamps with triggers
+**Features:**
+- Automatic timestamps
+- Full-text search indexes
 - 20+ performance indexes
-
----
-
-## Key Features Status
-
-| Feature | Status | Notes |
-|---------|--------|-------|
-| Authentication | Complete | Google/Facebook OAuth |
-| Listings CRUD | Complete | Create, edit, delete |
-| Auctions | Complete | Real-time bidding tested |
-| Search | Complete | Full-text with Khmer support |
-| Favorites | Complete | Persisted to database |
-| Messaging Backend | Complete | Database + Server Actions |
-| Real-time Messaging | Complete | Socket.IO tested & working |
-| Boost System | Complete | PayPal ready (untested) |
-| Notifications | Not Started | Planned |
-| Admin Panel | Not Started | Planned |
-
----
-
-## Environment Variables Reference
-
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL | Yes |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anonymous key | Yes |
-| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key | Yes |
-| `NEXT_PUBLIC_SOCKET_URL` | Socket.IO server URL | Yes |
-| `SOCKET_IO_PORT` | Socket.IO server port | No (default: 3001) |
-| `NEXT_PUBLIC_APP_URL` | Application URL | Yes |
-
----
-
-## Testing
-
-### Manual Testing
-
-**Authentication:**
-1. Visit http://localhost:3000
-2. Click "Start Selling" or "Browse Listings"
-3. Click "Continue with Google"
-4. Complete profile setup
-
-**Real-time Messaging:**
-1. Start both servers: `npm run dev:all`
-2. Open two browsers with different Google accounts
-3. Navigate to same message thread
-4. Send messages - should appear instantly
-
-**Auctions:**
-1. Create auction listing
-2. Open in two browsers (different accounts)
-3. Place bids - updates should be immediate
+- RLS policies on all tables
 
 ---
 
 ## Deployment
 
-### Next.js Application
-Deploy to Vercel, Render, or Railway:
-
+### Vercel (Recommended for Next.js)
 ```bash
 npm run build
-npm run start
 ```
+Deploy to Vercel and configure environment variables.
 
 ### Socket.IO Server
-Requires separate deployment:
-- **Option 1:** Deploy to Railway/Render/Fly.io as standalone server
-- **Option 2:** Use managed service (Ably, Pusher, Socket.IO Cloud)
-- **Option 3:** Custom Next.js server (requires Node.js runtime)
+Deploy separately to Railway, Render, or Fly.io:
+- Set `SOCKET_IO_PORT` environment variable
+- Update `NEXT_PUBLIC_SOCKET_URL` in Next.js app
 
-Update production environment variables accordingly.
+### Database
+Supabase handles PostgreSQL hosting. Update production environment variables.
+
+---
+
+## Development Commands
+
+```bash
+npm run dev          # Next.js dev server (port 3000)
+npm run dev:all      # Next.js + Socket.IO (recommended)
+npm run socket       # Socket.IO server only (port 3001)
+npm run build        # Production build
+npm run start        # Production server
+npm run lint         # ESLint
+npm run test:db      # Test database connection
+```
+
+---
+
+## Feature Status
+
+| Feature | Status |
+|---------|--------|
+| Authentication | Complete |
+| Listings CRUD | Complete |
+| Auctions | Complete |
+| Search | Complete |
+| Favorites | Complete |
+| Messaging | Complete |
+| Boost System | Complete (PayPal) |
+| Notifications | Planned |
+| Admin Panel | Planned |
 
 ---
 
 ## Documentation
 
-- **CLAUDE.md** - Complete development progress and session notes
-- **SOCKET-IO-IMPLEMENTATION.md** - Real-time messaging implementation guide
-- **QUICK-START.md** - Quick setup guide
-- **README-ARCH.md** - Architecture overview
-- **AUCTION-TESTING-CHECKLIST.md** - Auction system testing guide
-
----
-
-## Contributing
-
-This is a private project. For questions or issues, contact the development team.
+- `DEVELOPMENT_HISTORY.md` - Complete development history
+- `lib/config/branding.ts` - Configuration options
+- `lib/constants/categories.ts` - Category customization
 
 ---
 
 ## License
 
-Proprietary - All rights reserved.
+MIT License - see LICENSE file for details
 
 ---
 
-## Contact
+## Support
 
-For questions or support, please contact the project maintainer.
+For questions or issues, please open a GitHub issue.
 
 ---
 
-**Current Status**: Phase 3 of 5 (Core Features) - MVP Ready for Testing
+## Contributing
 
-**Last Updated**: December 16, 2025
+Contributions welcome! Please open an issue or PR.
+
+---
+
+**Built with Next.js, Supabase, and TypeScript**

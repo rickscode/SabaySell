@@ -35,7 +35,6 @@ function SetupProfileContent() {
         const { user } = await getCurrentUser();
 
         if (!user) {
-          console.log('No user found in setup-profile, redirecting to login');
           router.push('/auth/login');
           return;
         }
@@ -61,7 +60,6 @@ function SetupProfileContent() {
         // Only redirect if profile is complete AND not in edit mode
         const prof = profile as any;
         if (prof?.bio && prof?.location && prof?.telegram && prof?.whatsapp && !isEditMode) {
-          console.log('Profile already complete, redirecting to home');
           router.push('/');
           return;
         }

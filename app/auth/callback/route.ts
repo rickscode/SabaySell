@@ -19,7 +19,6 @@ export async function GET(request: NextRequest) {
     // If flow state not found, user might already be authenticated
     // Redirect to home instead of showing error
     if (error === 'server_error' && requestUrl.searchParams.get('error_code') === 'flow_state_not_found') {
-      console.log('Flow state not found - user may already be authenticated, redirecting to home')
       return NextResponse.redirect(new URL('/', requestUrl.origin))
     }
 
@@ -81,12 +80,10 @@ export async function GET(request: NextRequest) {
     // If no profile exists OR profile exists but incomplete (no bio/location/telegram/whatsapp), redirect to setup
     const prof = profile as any;
     if (profileError || !profile || (!prof.bio && !prof.location && !prof.telegram && !prof.whatsapp)) {
-      console.log('No profile or incomplete profile, redirecting to setup')
       return NextResponse.redirect(new URL('/auth/setup-profile', requestUrl.origin))
     }
 
     // Profile exists and is complete, redirect to home
-    console.log('Profile complete, redirecting to home')
     return NextResponse.redirect(new URL('/', requestUrl.origin))
   }
 

@@ -55,19 +55,19 @@ function LoginContent() {
     // If successful, Supabase will redirect automatically
   };
 
-  // Facebook OAuth - Hidden until new Facebook app created
-  // const handleFacebookLogin = async () => {
-  //   setLoading(true);
-  //   setError('');
+  // Facebook OAuth - Requires Facebook app configuration
+  const handleFacebookLogin = async () => {
+    setLoading(true);
+    setError('');
 
-  //   const { error } = await signInWithFacebook();
+    const { error } = await signInWithFacebook();
 
-  //   if (error) {
-  //     setError(error.message);
-  //     setLoading(false);
-  //   }
-  //   // If successful, Supabase will redirect automatically
-  // };
+    if (error) {
+      setError(error.message);
+      setLoading(false);
+    }
+    // If successful, Supabase will redirect automatically
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
@@ -125,8 +125,8 @@ function LoginContent() {
               Continue with Google
             </Button>
 
-            {/* Facebook OAuth - Hidden until new Facebook app created */}
-            {/* <Button
+            {/* Facebook OAuth - Requires Facebook app configuration in Supabase dashboard */}
+            <Button
               onClick={handleFacebookLogin}
               disabled={loading}
               className="w-full h-12 text-base font-medium bg-[#1877F2] hover:bg-[#166FE5] text-white"
@@ -135,7 +135,7 @@ function LoginContent() {
                 <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
               </svg>
               Continue with Facebook
-            </Button> */}
+            </Button>
           </div>
 
           {/* Divider */}

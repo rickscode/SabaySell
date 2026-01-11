@@ -70,9 +70,9 @@ const ramOptions = ["2GB", "4GB", "6GB", "8GB", "12GB", "16GB", "32GB", "64GB", 
 export function CreateListing({ onBack, onPublish, editingListing }: CreateListingProps) {
   const router = useRouter();
 
-  // MVP Feature Flags - Set to false to hide features while keeping code intact
-  const ENABLE_AUCTIONS = false;
-  const ENABLE_MESSAGING = false;
+  // Feature Flags - Toggle to enable/disable features
+  const ENABLE_AUCTIONS = true;
+  const ENABLE_MESSAGING = true;
 
   const [listingType, setListingType] = useState<"buy-now" | "auction">(
     editingListing?.type || "buy-now"

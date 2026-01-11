@@ -5,8 +5,8 @@ import { Badge } from "./ui/badge";
 import { Heart, ShoppingCart, DollarSign, Star, Flame } from "lucide-react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 
-// MVP Feature Flags - Set to false to hide features while keeping code intact
-const ENABLE_AUCTIONS = false;
+// Feature Flags - Toggle to enable/disable features
+const ENABLE_AUCTIONS = true;
 
 export interface Product {
   id: string;

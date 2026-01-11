@@ -1,8 +1,8 @@
 "use client";
 
-// MVP Feature Flags - Set to false to hide features while keeping code intact
-const ENABLE_AUCTIONS = false;
-const ENABLE_MESSAGING = false;
+// Feature Flags - Toggle to enable/disable features
+const ENABLE_AUCTIONS = true;
+const ENABLE_MESSAGING = true;
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";

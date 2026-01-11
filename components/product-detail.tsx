@@ -33,9 +33,9 @@ import { ProductCard } from "./product-card";
 import { placeBid } from "@/app/actions/auctions";
 import { toast } from "sonner";
 
-// MVP Feature Flags - Set to false to hide features while keeping code intact
-const ENABLE_AUCTIONS = false;
-const ENABLE_MESSAGING = false;
+// Feature Flags - Toggle to enable/disable features
+const ENABLE_AUCTIONS = true;
+const ENABLE_MESSAGING = true;
 
 interface ProductDetailProps {
   product: Product;
