@@ -201,6 +201,9 @@ npm run lint         # ESLint
 npm run test:db      # Test database connection
 ```
 
+### Known Issues
+- Development server currently hangs during initialization - to be fixed
+
 ---
 
 ## Feature Status
