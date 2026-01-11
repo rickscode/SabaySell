@@ -68,8 +68,8 @@ A production-ready, full-stack marketplace template with auctions, real-time mes
 
 ### 1. Clone & Install
 ```bash
-git clone https://github.com/yourusername/nextjs-marketplace-template.git
-cd nextjs-marketplace-template
+git clone repo
+cd repo
 npm install
 ```
 
