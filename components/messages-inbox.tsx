@@ -19,7 +19,6 @@ import { ImageWithFallback } from "./figma/ImageWithFallback";
 import type { ThreadWithDetails, MessageWithSender } from "@/lib/database.types";
 import { sendMessage, markMessagesAsRead } from "@/app/actions/messages";
 import { toast } from "sonner";
-import { useSocket } from "@/lib/hooks/useSocket";
 
 interface MessagesInboxProps {
   threads: ThreadWithDetails[];
@@ -76,49 +75,6 @@ export function MessagesInbox({ threads, currentUserId }: MessagesInboxProps) {
     }
   }, [selectedThreadId]);
 
-  // Socket.IO real-time message subscription
-  const socket = useSocket();
-
-  useEffect(() => {
-    if (!selectedThreadId || !socket) {
-      return;
-    }
-
-    socket.emit('thread:join', selectedThreadId);
-
-    const handleNewMessage = (message: MessageWithSender) => {
-      // Only update if message is from another user (avoid duplicates from own sends)
-      if (message.sender_id !== currentUserId) {
-        // Add message to local state
-        setLocalThreads((prev) =>
-          prev.map((thread) => {
-            if (thread.id === selectedThreadId) {
-              return {
-                ...thread,
-                messages: [...(thread.messages || []), message],
-                last_message_at: message.created_at,
-              };
-            }
-            return thread;
-          })
-        );
-
-        // Show notification
-        toast.success(`New message from ${message.sender.display_name}`);
-
-        // Mark as read immediately since user is viewing this thread
-        markMessagesAsRead(selectedThreadId);
-      }
-    };
-
-    socket.on('message:new', handleNewMessage);
-
-    // Cleanup on unmount or thread change
-    return () => {
-      socket.emit('thread:leave', selectedThreadId);
-      socket.off('message:new', handleNewMessage);
-    };
-  }, [selectedThreadId, socket, currentUserId]);
 
   // Handle sending a message
   const handleSendMessage = async () => {

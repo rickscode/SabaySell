@@ -9,7 +9,6 @@ import { revalidatePath } from 'next/cache'
 import { createServerClient } from '@/lib/supabase'
 import { findOrCreateThread } from '@/lib/queries/messages'
 import type { MessageInsert } from '@/lib/database.types'
-import { emitNewMessage } from '@/lib/socket-emitter'
 
 export interface SendMessageResult {
   success: boolean
@@ -121,28 +120,6 @@ export async function sendMessage(
 
     if (updateThreadError) {
       console.error('⚠️ Error updating thread:', updateThreadError);
-    }
-
-    // Emit Socket.IO event for real-time delivery
-    try {
-      const { data: sender } = await supabase
-        .from('users')
-        .select('id, display_name, avatar_url')
-        .eq('id', user.id)
-        .single();
-
-      if (sender) {
-        const messageWithSender = {
-          ...(newMessage as any),
-          sender
-        };
-        await emitNewMessage(threadId, messageWithSender);
-      } else {
-        console.error('⚠️ Could not fetch sender info for Socket.IO');
-      }
-    } catch (socketError) {
-      console.error('⚠️ Socket.IO emit error:', socketError);
-      // Don't fail the message send if Socket.IO fails
     }
 
     // Revalidate paths
