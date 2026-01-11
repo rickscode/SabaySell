@@ -20,7 +20,6 @@ A production-ready, full-stack marketplace template with auctions, real-time mes
 
 ### Advanced Features
 - **Real-time Auctions** - Live bidding with countdown timers
-- **Real-time Messaging** - Socket.IO for instant buyer-seller communication
 - **Boost System** - PayPal integration for promoted listings
 - **i18n Support** - Built-in internationalization (English + Khmer example)
 - **Progressive Enhancement** - Feature flags to toggle functionality
@@ -47,7 +46,6 @@ A production-ready, full-stack marketplace template with auctions, real-time mes
 
 **Backend:**
 - Next.js Server Actions
-- Socket.IO (real-time messaging)
 - Supabase Auth
 - PostgreSQL (Supabase)
 
@@ -79,7 +77,6 @@ Create `.env.local`:
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
-NEXT_PUBLIC_SOCKET_URL=http://localhost:3001
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 NODE_ENV=development
 ```
@@ -99,7 +96,7 @@ Set up Google and Facebook OAuth in Supabase Dashboard → Authentication → Pr
 
 ### 5. Run Development Server
 ```bash
-npm run dev:all   # Starts both Next.js (3000) and Socket.IO (3001)
+npm run dev   # Starts Next.js development server (port 3000)
 ```
 
 Visit http://localhost:3000
@@ -143,7 +140,6 @@ const ENABLE_MESSAGING = true;
 │   ├── actions/              # Server actions
 │   ├── auth/                 # Authentication pages
 │   ├── api/                  # API routes
-│   ├── messages/             # Messaging UI
 │   └── page.tsx              # Homepage
 ├── components/               # React components
 │   ├── ui/                   # shadcn/ui components
@@ -153,8 +149,7 @@ const ENABLE_MESSAGING = true;
 │   ├── constants/            # Categories, brands, etc.
 │   ├── hooks/                # React hooks
 │   ├── queries/              # Database queries
-│   ├── supabase.ts           # Supabase client
-│   └── socket.ts             # Socket.IO server
+│   └── supabase.ts           # Supabase client
 ├── supabase/
 │   └── migrations/           # Database schema
 ├── public/                   # Static assets
@@ -165,14 +160,12 @@ const ENABLE_MESSAGING = true;
 
 ## Database Schema
 
-10 tables with Row Level Security:
+8 tables with Row Level Security:
 - `users` - User profiles
 - `listings` - Products (fixed-price + auction)
 - `images` - Product images
 - `auctions` - Auction metadata
 - `bids` - Bid history
-- `threads` - Message threads
-- `messages` - Chat messages
 - `boosts` - Promoted listings
 - `transactions` - Payment records
 - `reports` - Moderation
@@ -193,11 +186,6 @@ npm run build
 ```
 Deploy to Vercel and configure environment variables.
 
-### Socket.IO Server
-Deploy separately to Railway, Render, or Fly.io:
-- Set `SOCKET_IO_PORT` environment variable
-- Update `NEXT_PUBLIC_SOCKET_URL` in Next.js app
-
 ### Database
 Supabase handles PostgreSQL hosting. Update production environment variables.
 
@@ -207,8 +195,6 @@ Supabase handles PostgreSQL hosting. Update production environment variables.
 
 ```bash
 npm run dev          # Next.js dev server (port 3000)
-npm run dev:all      # Next.js + Socket.IO (recommended)
-npm run socket       # Socket.IO server only (port 3001)
 npm run build        # Production build
 npm run start        # Production server
 npm run lint         # ESLint
@@ -226,8 +212,8 @@ npm run test:db      # Test database connection
 | Auctions | Complete |
 | Search | Complete |
 | Favorites | Complete |
-| Messaging | Complete |
 | Boost System | Complete (PayPal) |
+| Messaging | Planned |
 | Notifications | Planned |
 | Admin Panel | Planned |
 
