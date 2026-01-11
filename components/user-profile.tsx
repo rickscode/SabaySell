@@ -60,100 +60,12 @@ interface UserProfileProps {
   userId?: string; // Optional userId to view another user's profile
 }
 
-// Mock user data
-const mockUser = {
-  id: "user123",
-  name: "Sophea Chan",
-  username: "sophea_seller",
-  avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400",
-  location: "Phnom Penh, Cambodia",
-  memberSince: new Date("2023-06-15"),
-  bio: "Passionate about tech and vintage collectibles. I sell genuine products with great care. Feel free to message me with any questions!",
-  verified: true,
-  rating: 4.8,
-  totalReviews: 127,
-  totalSales: 156,
-  responseRate: 98,
-  responseTime: "within 2 hours",
-  stats: {
-    followers: 342,
-    following: 89,
-    activeListings: 12,
-  },
-};
 
-const mockReviews: Review[] = [
-  {
-    id: "1",
-    rating: 5,
-    comment: "Great seller! Item was exactly as described. Fast response and smooth transaction.",
-    reviewerName: "Chanthy Lim",
-    reviewerAvatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400",
-    date: new Date("2025-10-20"),
-    productTitle: "MacBook Pro 16-inch M2 Pro",
-  },
-  {
-    id: "2",
-    rating: 5,
-    comment: "Excellent communication. Very professional and trustworthy seller. Highly recommended!",
-    reviewerName: "Vanna Sok",
-    date: new Date("2025-10-18"),
-    productTitle: "iPhone 15 Pro Max",
-  },
-  {
-    id: "3",
-    rating: 4,
-    comment: "Good product, fair price. Minor scratches not mentioned in description but overall satisfied.",
-    reviewerName: "Pov Seng",
-    reviewerAvatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400",
-    date: new Date("2025-10-15"),
-    productTitle: "Canon EOS R5 Camera",
-  },
-  {
-    id: "4",
-    rating: 5,
-    comment: "Amazing seller! Product arrived in perfect condition. Would buy again!",
-    reviewerName: "Sreymom Chea",
-    date: new Date("2025-10-12"),
-    productTitle: "Apple Watch Series 9",
-  },
-];
+// Mock data removed - component should fetch real user data from database
+const mockUser = null;
+const mockReviews: Review[] = [];
+const mockActiveListings: Product[] = [];
 
-const mockActiveListings: Product[] = [
-  {
-    id: "1",
-    title: "MacBook Pro 16-inch M2 Pro - Space Gray (2023)",
-    price: 2199.99,
-    originalPrice: 2499.99,
-    image: "https://images.unsplash.com/photo-1511385348-a52b4a160dc2?w=400",
-    condition: "New",
-    shipping: "Free shipping",
-    location: "Phnom Penh, Cambodia",
-    buyNow: true,
-  },
-  {
-    id: "2",
-    title: "iPhone 15 Pro Max 256GB - Natural Titanium",
-    price: 899.99,
-    image: "https://images.unsplash.com/photo-1732998369893-af4c9a4695fe?w=400",
-    condition: "Used",
-    shipping: "$12.99 shipping",
-    location: "Phnom Penh, Cambodia",
-    bids: 23,
-    timeLeft: "2d 5h left",
-    auction: true,
-  },
-  {
-    id: "3",
-    title: "Canon EOS R5 Mirrorless Camera Body",
-    price: 3299.0,
-    image: "https://images.unsplash.com/photo-1579535984712-92fffbbaa266?w=400",
-    condition: "Refurbished",
-    shipping: "Free shipping",
-    location: "Phnom Penh, Cambodia",
-    buyNow: true,
-  },
-];
 
 export function UserProfile({
   onBack,

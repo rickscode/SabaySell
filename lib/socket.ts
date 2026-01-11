@@ -26,33 +26,26 @@ export const getSocketIO = () => {
     });
 
     io.on('connection', (socket) => {
-      console.log('🟢 Socket.IO client connected:', socket.id);
-
       socket.on('thread:join', (threadId: string) => {
         socket.join(`thread:${threadId}`);
-        console.log(`🟢 Socket ${socket.id} joined thread:${threadId}`);
       });
 
       socket.on('thread:leave', (threadId: string) => {
         socket.leave(`thread:${threadId}`);
-        console.log(`🔴 Socket ${socket.id} left thread:${threadId}`);
       });
 
       // Server-side broadcast from Next.js server actions
       socket.on('server:broadcast', (data: { threadId: string; message: MessageWithSender }) => {
-        console.log(`📡 Server broadcast request for thread:${data.threadId}`);
         io.to(`thread:${data.threadId}`).emit('message:new', data.message);
-        console.log(`📤 Broadcasted message to thread:${data.threadId}`, data.message.id);
       });
 
       socket.on('disconnect', () => {
-        console.log('🔴 Socket.IO client disconnected:', socket.id);
+        // Connection closed
       });
     });
 
     const port = process.env.SOCKET_IO_PORT || 3001;
     httpServer.listen(port);
-    console.log(`✅ Socket.IO server listening on port ${port}`);
   }
 
   return io;
@@ -61,7 +54,6 @@ export const getSocketIO = () => {
 // For backward compatibility - but this should not be used anymore
 // Use lib/socket-emitter.ts from server actions instead
 export const emitNewMessage = (threadId: string, message: MessageWithSender) => {
-  console.warn('⚠️ Direct emitNewMessage is deprecated. Socket.IO server should be standalone.');
   // Don't call getSocketIO() here - will cause EADDRINUSE error
 };
 

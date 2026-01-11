@@ -91,8 +91,7 @@ export default function UserProfilePage() {
       onSettings={() => router.push('/settings')}
       onEditProfile={() => router.push('/settings')}
       onProductClick={(product: Product) => {
-        console.log('Product clicked:', product);
-        // TODO: Navigate to product detail page
+        router.push(`/listings/${product.id}`);
       }}
     />
   );

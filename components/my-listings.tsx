@@ -66,71 +66,10 @@ interface MyListingsProps {
 }
 
 // Mock data
-const mockListings: Listing[] = [
-  {
-    id: "1",
-    title: "MacBook Pro 16-inch M2 Pro - Space Gray (2023)",
-    price: 2199.99,
-    image: "https://images.unsplash.com/photo-1511385348-a52b4a160dc2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsYXB0b3AlMjBjb21wdXRlcnxlbnwxfHx8fDE3NjA5MDc3NTR8MA&ixlib=rb-4.1.0&q=80&w=400",
-    status: "active",
-    type: "buy-now",
-    views: 245,
-    watchers: 12,
-    messages: 8,
-    createdAt: new Date("2025-10-20"),
-  },
-  {
-    id: "2",
-    title: "iPhone 15 Pro Max 256GB - Natural Titanium",
-    price: 899.99,
-    image: "https://images.unsplash.com/photo-1732998369893-af4c9a4695fe?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzbWFydHBob25lJTIwZGV2aWNlfGVufDF8fHx8MTc2MDk2OTUwMXww&ixlib=rb-4.1.0&q=80&w=400",
-    status: "active",
-    type: "auction",
-    views: 387,
-    watchers: 23,
-    messages: 15,
-    bids: 23,
-    timeLeft: "2d 5h",
-    createdAt: new Date("2025-10-22"),
-  },
-  {
-    id: "3",
-    title: "Canon EOS R5 Mirrorless Camera Body",
-    price: 3299.0,
-    image: "https://images.unsplash.com/photo-1579535984712-92fffbbaa266?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjYW1lcmElMjBwaG90b2dyYXBoeXxlbnwxfHx8fDE3NjEwMTUzNDF8MA&ixlib=rb-4.1.0&q=80&w=400",
-    status: "sold",
-    type: "buy-now",
-    views: 456,
-    watchers: 18,
-    messages: 22,
-    createdAt: new Date("2025-10-15"),
-  },
-  {
-    id: "4",
-    title: "Apple Watch Series 9 GPS 45mm - Midnight Aluminum",
-    price: 379.0,
-    image: "https://images.unsplash.com/photo-1637719752114-42a31081896c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3YXRjaCUyMHRpbWVwaWVjZXxlbnwxfHx8fDE3NjA5NjI5MDZ8MA&ixlib=rb-4.1.0&q=80&w=400",
-    status: "expired",
-    type: "auction",
-    views: 198,
-    watchers: 8,
-    messages: 5,
-    bids: 12,
-    createdAt: new Date("2025-10-10"),
-  },
-  {
-    id: "5",
-    title: "Nike Air Max 270 React - Summit White",
-    price: 129.99,
-    image: "https://images.unsplash.com/photo-1656944227480-98180d2a5155?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzbmVha2VycyUyMHNob2VzfGVufDF8fHx8MTc2MDk3NTQ2M3ww&ixlib=rb-4.1.0&q=80&w=400",
-    status: "draft",
-    type: "buy-now",
-    views: 0,
-    watchers: 0,
-    messages: 0,
-    createdAt: new Date("2025-10-23"),
-  },
-];
+
+// Mock listings removed - component fetches real listings from database via getUserListings()
+const mockListings: Listing[] = [];
+
 
 export function MyListings({ onBack, onCreateNew, onEditListing, onViewListing }: MyListingsProps) {
   const [listings, setListings] = useState<ListingWithImages[]>([]);

@@ -151,32 +151,9 @@ export function ProductDetail({ product, onBack, similarProducts, onContactSelle
     product.image,
   ];
 
-  const mockReviews = [
-    {
-      id: "1",
-      author: "John D.",
-      rating: 5,
-      date: "2 days ago",
-      comment: "Great product! Fast shipping and exactly as described.",
-    },
-    {
-      id: "2",
-      author: "Sarah M.",
-      rating: 4,
-      date: "1 week ago",
-      comment: "Good quality, minor scratch but seller was responsive.",
-    },
-  ];
-
-  const mockQuestions = [
-    {
-      id: "1",
-      question: "Does this come with original packaging?",
-      answer: "Yes, includes original box and all accessories.",
-      askedBy: "Mike R.",
-      date: "3 days ago",
-    },
-  ];
+  // Reviews and questions not implemented yet - will be added post-MVP
+  const mockReviews: any[] = [];
+  const mockQuestions: any[] = [];
 
   return (
     <div className="min-h-screen bg-gray-50">

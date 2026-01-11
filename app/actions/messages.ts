@@ -43,14 +43,10 @@ export async function sendMessage(
   attachmentUrl?: string
 ): Promise<SendMessageResult> {
   try {
-    console.log('🔵 sendMessage() called:', { threadId, body });
-
     // Get authenticated user
     const supabase = await createServerClient()
-    console.log('🔵 Supabase client created');
 
     const { data: { user }, error: authError } = await supabase.auth.getUser()
-    console.log('🔵 Auth check:', { user: user?.id, authError });
 
     if (!user || authError) {
       console.error('❌ Not authenticated:', authError);
@@ -64,14 +60,11 @@ export async function sendMessage(
     }
 
     // Get thread and verify user has access
-    console.log('🔵 Fetching thread:', threadId);
     const { data: thread, error: threadError } = await supabase
       .from('threads')
       .select('buyer_id, seller_id, is_blocked')
       .eq('id', threadId)
       .single()
-
-    console.log('🔵 Thread fetch result:', { thread, threadError });
 
     if (threadError || !thread) {
       console.error('❌ Thread not found:', threadError);
@@ -97,7 +90,6 @@ export async function sendMessage(
     }
 
     // Insert message
-    console.log('🔵 Inserting message...');
     const messageData: MessageInsert = {
       thread_id: threadId,
       sender_id: user.id,
@@ -106,7 +98,6 @@ export async function sendMessage(
       read_at: null,
       attachment_url: attachmentUrl || null
     }
-    console.log('🔵 Message data:', messageData);
 
     const { data: newMessage, error: messageError } = await supabase
       .from('messages')
@@ -114,14 +105,10 @@ export async function sendMessage(
       .select()
       .single()
 
-    console.log('🔵 Insert result:', { newMessage, messageError });
-
     if (messageError) {
       console.error('❌ Error inserting message:', messageError);
       return { success: false, error: 'Failed to send message' }
     }
-
-    console.log('✅ Message inserted successfully:', newMessage);
 
     // Update thread's last_message_at
     const { error: updateThreadError } = await supabase
@@ -138,7 +125,6 @@ export async function sendMessage(
 
     // Emit Socket.IO event for real-time delivery
     try {
-      console.log('🔵 Fetching sender info for Socket.IO event...');
       const { data: sender } = await supabase
         .from('users')
         .select('id, display_name, avatar_url')
@@ -150,9 +136,7 @@ export async function sendMessage(
           ...(newMessage as any),
           sender
         };
-        console.log('🔵 Emitting Socket.IO event...');
         await emitNewMessage(threadId, messageWithSender);
-        console.log('✅ Socket.IO event emitted');
       } else {
         console.error('⚠️ Could not fetch sender info for Socket.IO');
       }
@@ -164,7 +148,6 @@ export async function sendMessage(
     // Revalidate paths
     // revalidatePath('/messages') // REMOVED - causes page reload, preventing open chat
 
-    console.log('✅ sendMessage() complete');
     return {
       success: true,
       messageId: (newMessage as any).id
@@ -184,13 +167,9 @@ export async function createThreadAndSendMessage(
   offer?: number
 ): Promise<CreateThreadResult> {
   try {
-    console.log('🔵 createThreadAndSendMessage() called:', { listingId, body, offer });
-
     // Get authenticated user
     const supabase = await createServerClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    console.log('🔵 Auth check:', { user: user?.id, authError });
 
     if (!user || authError) {
       console.error('❌ Not authenticated');
@@ -204,14 +183,11 @@ export async function createThreadAndSendMessage(
     }
 
     // Get listing to check ownership
-    console.log('🔵 Fetching listing:', listingId);
     const { data: listing, error: listingError } = await supabase
       .from('listings')
       .select('user_id')
       .eq('id', listingId)
       .single()
-
-    console.log('🔵 Listing result:', { listing, listingError });
 
     if (listingError || !listing) {
       console.error('❌ Listing not found');
@@ -230,9 +206,7 @@ export async function createThreadAndSendMessage(
     }
 
     // Find or create thread
-    console.log('🔵 Finding or creating thread...');
     const { thread, isNew } = await findOrCreateThread(listingId, user.id, supabase)
-    console.log('🔵 Thread result:', { thread: thread?.id, isNew });
 
     // Format message body with offer if provided
     let messageBody = body.trim()
@@ -240,10 +214,8 @@ export async function createThreadAndSendMessage(
       messageBody += `\n\nMade an offer: $${offer.toFixed(2)}`
     }
 
-    console.log('🔵 Calling sendMessage with thread:', thread.id);
     // Send the message
     const result = await sendMessage(thread.id, messageBody)
-    console.log('🔵 sendMessage result:', result);
 
     if (!result.success) {
       console.error('❌ Failed to send message:', result.error);
@@ -253,7 +225,6 @@ export async function createThreadAndSendMessage(
       }
     }
 
-    console.log('✅ createThreadAndSendMessage() complete');
     return {
       success: true,
       threadId: thread.id,

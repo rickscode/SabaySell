@@ -18,14 +18,6 @@ const getEmitterSocket = () => {
       reconnectionAttempts: 5,
     });
 
-    emitterSocket.on('connect', () => {
-      console.log('🟢 Server action Socket.IO emitter connected:', emitterSocket?.id);
-    });
-
-    emitterSocket.on('disconnect', () => {
-      console.log('🔴 Server action Socket.IO emitter disconnected');
-    });
-
     emitterSocket.on('connect_error', (error) => {
       console.error('❌ Socket.IO emitter connection error:', error.message);
     });
@@ -68,7 +60,6 @@ export const emitNewMessage = async (threadId: string, message: MessageWithSende
 
     // Emit the message to the server, which will broadcast to all clients in the room
     socket.emit('server:broadcast', { threadId, message } as any);
-    console.log(`📤 Server action emitted message to thread:${threadId}`, message.id);
   } catch (error) {
     console.error('❌ Failed to emit message via Socket.IO:', error);
     // Don't throw - message is already saved to DB, Socket.IO is just for real-time updates

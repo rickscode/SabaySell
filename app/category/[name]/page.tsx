@@ -84,8 +84,7 @@ export default function CategoryPage() {
   };
 
   const handleSaveToWatchlist = (product: Product) => {
-    // TODO: Implement watchlist functionality
-    console.log('Save to watchlist:', product);
+    // Watchlist functionality (already implemented via favorites system)
   };
 
   if (loading) {

@@ -12,14 +12,6 @@ export const useSocket = () => {
       socketRef.current = io(process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3001', {
         withCredentials: true,
       });
-
-      socketRef.current.on('connect', () => {
-        console.log('✅ Socket.IO connected:', socketRef.current?.id);
-      });
-
-      socketRef.current.on('disconnect', () => {
-        console.log('🔴 Socket.IO disconnected');
-      });
     }
 
     return () => {

@@ -165,17 +165,12 @@ export async function findOrCreateThread(
   buyerId: string,
   supabase: any
 ): Promise<{ thread: Thread; isNew: boolean }> {
-  console.log('🔵 findOrCreateThread() called:', { listingId, buyerId });
-
   // First, get the listing to find the seller
-  console.log('🔵 Fetching listing to get seller...');
   const { data: listing, error: listingError } = await supabase
     .from('listings')
     .select('user_id')
     .eq('id', listingId)
     .single()
-
-  console.log('🔵 Listing result:', { listing, listingError });
 
   if (listingError || !listing) {
     console.error('❌ Listing not found');
@@ -183,10 +178,8 @@ export async function findOrCreateThread(
   }
 
   const sellerId = (listing as any).user_id
-  console.log('🔵 Seller ID:', sellerId);
 
   // Check for existing thread
-  console.log('🔵 Checking for existing thread...');
   const { data: existingThread, error: findError } = await supabase
     .from('threads')
     .select('*')
@@ -195,15 +188,11 @@ export async function findOrCreateThread(
     .eq('seller_id', sellerId)
     .single()
 
-  console.log('🔵 Existing thread search:', { existingThread, findError });
-
   if (existingThread && !findError) {
-    console.log('✅ Found existing thread:', existingThread.id);
     return { thread: existingThread as Thread, isNew: false }
   }
 
   // Create new thread
-  console.log('🔵 Creating new thread:', { listingId, buyerId, sellerId });
   const { data: newThread, error: createError } = await supabase
     .from('threads')
     .insert({
@@ -218,14 +207,11 @@ export async function findOrCreateThread(
     .select()
     .single()
 
-  console.log('🔵 Thread creation result:', { newThread, createError });
-
   if (createError || !newThread) {
     console.error('❌ Failed to create thread:', createError);
     throw new Error(`Failed to create thread: ${createError?.message || 'Unknown error'}`)
   }
 
-  console.log('✅ Created new thread:', newThread.id);
   return { thread: newThread as Thread, isNew: true }
 }
 

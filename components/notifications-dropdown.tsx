@@ -32,74 +32,9 @@ interface Notification {
   productImage?: string;
 }
 
-const mockNotifications: Notification[] = [
-  {
-    id: "1",
-    type: "message",
-    title: "New message from Chanthy",
-    description: "I'm interested in your MacBook Pro. Is it still available?",
-    time: "5 min ago",
-    read: false,
-    productImage: "https://images.unsplash.com/photo-1511385348-a52b4a160dc2?w=100",
-  },
-  {
-    id: "2",
-    type: "offer",
-    title: "New offer on iPhone 15 Pro",
-    description: "Vanna offered $850.00 (asking $899.99)",
-    time: "1 hour ago",
-    read: false,
-    productImage: "https://images.unsplash.com/photo-1732998369893-af4c9a4695fe?w=100",
-  },
-  {
-    id: "3",
-    type: "bid",
-    title: "You've been outbid!",
-    description: "Someone bid $425.00 on Apple Watch Series 9",
-    time: "2 hours ago",
-    read: false,
-    productImage: "https://images.unsplash.com/photo-1637719752114-42a31081896c?w=100",
-  },
-  {
-    id: "4",
-    type: "watcher",
-    title: "3 new watchers",
-    description: "3 people are watching your MacBook Pro listing",
-    time: "4 hours ago",
-    read: true,
-    productImage: "https://images.unsplash.com/photo-1511385348-a52b4a160dc2?w=100",
-  },
-  {
-    id: "5",
-    type: "price-drop",
-    title: "Price drop alert!",
-    description: "Canon EOS R5 dropped to $2,999 (was $3,299)",
-    time: "6 hours ago",
-    read: true,
-    productImage: "https://images.unsplash.com/photo-1579535984712-92fffbbaa266?w=100",
-  },
-  {
-    id: "6",
-    type: "sold",
-    title: "Item sold!",
-    description: "Your Canon EOS R5 has been marked as sold",
-    time: "1 day ago",
-    read: true,
-    productImage: "https://images.unsplash.com/photo-1579535984712-92fffbbaa266?w=100",
-  },
-  {
-    id: "7",
-    type: "expiring",
-    title: "Listing ending soon",
-    description: "Your Apple Watch auction ends in 2 hours",
-    time: "1 day ago",
-    read: true,
-    productImage: "https://images.unsplash.com/photo-1637719752114-42a31081896c?w=100",
-  },
-];
-
 export function NotificationsDropdown() {
-  const [notifications, setNotifications] = useState(mockNotifications);
+  // Notifications not implemented yet - will be added post-MVP
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [activeTab, setActiveTab] = useState("all");
 
   const unreadCount = notifications.filter((n) => !n.read).length;

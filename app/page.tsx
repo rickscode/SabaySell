@@ -542,7 +542,6 @@ export default function App() {
 
   const handlePublishListing = (listing: any) => {
     // In real app, save to backend
-    console.log("Publishing listing:", listing);
     router.push('/my-listings');
   };
 
