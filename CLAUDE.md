@@ -38,6 +38,14 @@
   - Category-specific subcategories
   - Homepage & create listing updated
   - i18n translations updated (English + Khmer)
+- ✅ **2-Category Niche Focus - COMPLETE** ✅ (Dec 24, 2025)
+  - **Peter Thiel's "Start Small and Monopolize" strategy applied**
+  - Only 2 categories visible: **Mobile Phones** and **Tablets & iPads**
+  - Laptops & Accessories hidden via `enabled: false` flag
+  - Route guards redirect `/category/laptops` and `/category/accessories` to homepage
+  - All code for hidden categories preserved for future expansion
+  - Database intact - existing laptop/accessories listings preserved
+  - 100% SEO focus on mobile devices only
 - ✅ Category filtering & routes
 - ✅ **MVP Simplification - COMPLETE** 🎉 (Dec 22, 2025)
   - **Fixed-price listings only** (auctions hidden via feature flags)

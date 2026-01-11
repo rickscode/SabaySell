@@ -37,7 +37,7 @@ import {
 import { toast } from "sonner";
 import { createListing, uploadImagesForListing, updateListing, type CreateListingData } from "@/app/actions/listings";
 import { updateUserProfile } from "@/app/actions/users";
-import { getAllCategories } from "@/lib/constants/categories";
+import { getAllCategories, getEnabledCategories } from "@/lib/constants/categories";
 import { getBrandsForCategory, type ElectronicsCategory } from "@/lib/constants/brands";
 import { getModelsForBrand } from "@/lib/constants/models";
 
@@ -48,7 +48,7 @@ interface CreateListingProps {
 }
 
 // Electronics-only categories for MVP (SEO-optimized for Cambodia)
-const categories = getAllCategories().map(cat => cat.id);
+const categories = getEnabledCategories().map(cat => cat.id);
 
 const conditions = [
   { label: "New", value: "new" },

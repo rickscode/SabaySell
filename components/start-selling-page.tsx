@@ -19,22 +19,20 @@ export function StartSellingPage({ onNavigate, onCreateListing }: StartSellingPa
         title: "Selling Resources",
         links: [
           { label: "Start Selling", onClick: () => {} },
-          { label: "Learn to Sell", onClick: () => onNavigate("learn-to-sell") },
-          { label: "Business Sellers", onClick: () => onNavigate("business-sellers") },
-          { label: "Pricing Guide", onClick: () => onNavigate("pricing") },
-          { label: "Featured Listings", onClick: () => onNavigate("featured") },
+          { label: "Contact Us", onClick: () => onNavigate("contact") },
+          { label: "About Us", onClick: () => onNavigate("company-info") },
         ],
       }}
       relatedTopics={[
         {
-          title: "Learn to Sell",
-          description: "Advanced tips for successful selling",
-          onClick: () => onNavigate("learn-to-sell"),
+          title: "Contact Us",
+          description: "Get help and support from our team",
+          onClick: () => onNavigate("contact"),
         },
         {
-          title: "Business Sellers",
-          description: "Sell at scale with business tools",
-          onClick: () => onNavigate("business-sellers"),
+          title: "About SabaySell",
+          description: "Learn more about our marketplace",
+          onClick: () => onNavigate("company-info"),
         },
       ]}
     >

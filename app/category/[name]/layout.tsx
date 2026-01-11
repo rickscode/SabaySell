@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
+import { redirect } from 'next/navigation';
 import { generateCategoryMetadata } from '@/lib/seo/metadata';
+import { getCategoryBySlug } from '@/lib/constants/categories';
 
 export async function generateMetadata({ params }: { params: Promise<{ name: string }> }): Promise<Metadata> {
   const { name } = await params;
@@ -19,7 +21,19 @@ export async function generateMetadata({ params }: { params: Promise<{ name: str
     "accessories": "accessories",
   };
 
-  const slug = categorySlugMap[categoryName] || "phones";
+  const slug = categorySlugMap[categoryName];
+
+  if (!slug) {
+    redirect('/');
+  }
+
+  const categoryConfig = getCategoryBySlug(slug);
+
+  // Route guard: Redirect to homepage if category is disabled
+  if (!categoryConfig || !categoryConfig.enabled) {
+    redirect('/');
+  }
+
   return generateCategoryMetadata(slug);
 }
 

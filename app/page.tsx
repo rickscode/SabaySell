@@ -64,18 +64,9 @@ import { NotificationsDropdown } from "@/components/notifications-dropdown";
 import { CategoryBrowse } from "@/components/category-browse";
 import { SearchResults } from "@/components/search-results";
 import { MobileNav } from "@/components/mobile-nav";
-import { RegistrationPage } from "@/components/registration-page";
-import { BiddingHelpPage } from "@/components/bidding-help-page";
 import { StartSellingPage } from "@/components/start-selling-page";
 import { ContactUsPage } from "@/components/contact-us-page";
 import { CompanyInfoPage } from "@/components/company-info-page";
-import { StoresPage } from "@/components/stores-page";
-import { LearnToSellPage } from "@/components/learn-to-sell-page";
-import { BusinessSellersPage } from "@/components/business-sellers-page";
-import { SellerHelpPage } from "@/components/seller-help-page";
-import { ResolutionCenterPage } from "@/components/resolution-center-page";
-import { NewsPage } from "@/components/news-page";
-import { CareersPage } from "@/components/careers-page";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -94,7 +85,7 @@ import type { ListingWithImages } from "@/lib/database.types";
 import { getFavoriteIdsForUser } from "@/lib/queries/favorites";
 import { toggleFavorite } from "@/app/actions/favorites";
 import { getUnreadCount } from "@/lib/queries/messages";
-import { getAllCategories } from "@/lib/constants/categories";
+import { getAllCategories, getEnabledCategories } from "@/lib/constants/categories";
 
 // Map icon names to Lucide icon components
 const iconMap: Record<string, any> = {
@@ -104,7 +95,7 @@ const iconMap: Record<string, any> = {
   Headphones,
 };
 
-const categoriesConfig = getAllCategories().map(cat => ({
+const categoriesConfig = getEnabledCategories().map(cat => ({
   nameKey: `categories.${cat.slug}`,
   icon: iconMap[cat.icon] || Smartphone,
   slug: cat.slug,
@@ -182,29 +173,20 @@ function calculateTimeLeft(endsAt: string): string {
   return `${minutes}m`;
 }
 
-type View = 
-  | "home" 
-  | "product" 
-  | "watchlist" 
-  | "messages" 
-  | "create-listing" 
-  | "my-listings" 
-  | "profile" 
+type View =
+  | "home"
+  | "product"
+  | "watchlist"
+  | "messages"
+  | "create-listing"
+  | "my-listings"
+  | "profile"
   | "settings"
   | "category-browse"
   | "search-results"
-  | "registration"
-  | "bidding-help"
   | "start-selling"
   | "contact"
-  | "company-info"
-  | "stores"
-  | "learn-to-sell"
-  | "business-sellers"
-  | "seller-help"
-  | "resolution"
-  | "news"
-  | "careers";
+  | "company-info";
 
 export default function App() {
   const router = useRouter();
@@ -679,15 +661,6 @@ export default function App() {
     );
   }
 
-  if (currentView === "registration") {
-    return <RegistrationPage onNavigate={(view) => setCurrentView(view as View)} />;
-  }
-
-  // MVP: Hide bidding help page
-  if (ENABLE_AUCTIONS && currentView === "bidding-help") {
-    return <BiddingHelpPage onNavigate={(view) => setCurrentView(view as View)} />;
-  }
-
   if (currentView === "start-selling") {
     return <StartSellingPage onNavigate={(view) => setCurrentView(view as View)} onCreateListing={handleCreateListing} />;
   }
@@ -698,34 +671,6 @@ export default function App() {
 
   if (currentView === "company-info") {
     return <CompanyInfoPage onNavigate={(view) => setCurrentView(view as View)} />;
-  }
-
-  if (currentView === "stores") {
-    return <StoresPage onNavigate={(view) => setCurrentView(view as View)} />;
-  }
-
-  if (currentView === "learn-to-sell") {
-    return <LearnToSellPage onNavigate={(view) => setCurrentView(view as View)} />;
-  }
-
-  if (currentView === "business-sellers") {
-    return <BusinessSellersPage onNavigate={(view) => setCurrentView(view as View)} />;
-  }
-
-  if (currentView === "seller-help") {
-    return <SellerHelpPage onNavigate={(view) => setCurrentView(view as View)} />;
-  }
-
-  if (currentView === "resolution") {
-    return <ResolutionCenterPage onNavigate={(view) => setCurrentView(view as View)} />;
-  }
-
-  if (currentView === "news") {
-    return <NewsPage onNavigate={(view) => setCurrentView(view as View)} />;
-  }
-
-  if (currentView === "careers") {
-    return <CareersPage onNavigate={(view) => setCurrentView(view as View)} />;
   }
 
   return (
@@ -1006,33 +951,7 @@ export default function App() {
       {/* Footer */}
       <footer className="bg-white border-t mt-12">
         <div className="max-w-7xl mx-auto px-4 py-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            <div>
-              <h3 className="mb-3">{t('footer.buy.title')}</h3>
-              <ul className="space-y-2 text-sm text-gray-600">
-                <li
-                  className="hover:text-[#fa6723] cursor-pointer"
-                  onClick={() => setCurrentView("registration")}
-                >
-                  {t('footer.buy.browse')}
-                </li>
-                {/* MVP: Hide bidding help link */}
-                {ENABLE_AUCTIONS && (
-                  <li
-                    className="hover:text-[#fa6723] cursor-pointer"
-                    onClick={() => setCurrentView("bidding-help")}
-                  >
-                    {t('footer.buy.help')}
-                  </li>
-                )}
-                <li
-                  className="hover:text-[#fa6723] cursor-pointer"
-                  onClick={() => setCurrentView("stores")}
-                >
-                  {t('footer.sell.stores')}
-                </li>
-              </ul>
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div>
               <h3 className="mb-3">{t('footer.sell.title')}</h3>
               <ul className="space-y-2 text-sm text-gray-600">
@@ -1041,18 +960,6 @@ export default function App() {
                   onClick={() => setCurrentView("start-selling")}
                 >
                   {t('footer.sell.start')}
-                </li>
-                <li
-                  className="hover:text-[#fa6723] cursor-pointer"
-                  onClick={() => setCurrentView("learn-to-sell")}
-                >
-                  {t('footer.sell.learn')}
-                </li>
-                <li
-                  className="hover:text-[#fa6723] cursor-pointer"
-                  onClick={() => setCurrentView("business-sellers")}
-                >
-                  {t('footer.help.business')}
                 </li>
               </ul>
             </div>
@@ -1065,18 +972,6 @@ export default function App() {
                 >
                   {t('footer.about.company')}
                 </li>
-                <li
-                  className="hover:text-[#fa6723] cursor-pointer"
-                  onClick={() => setCurrentView("news")}
-                >
-                  {t('footer.about.news')}
-                </li>
-                <li
-                  className="hover:text-[#fa6723] cursor-pointer"
-                  onClick={() => setCurrentView("careers")}
-                >
-                  {t('footer.about.careers')}
-                </li>
               </ul>
             </div>
             <div>
@@ -1084,21 +979,9 @@ export default function App() {
               <ul className="space-y-2 text-sm text-gray-600">
                 <li
                   className="hover:text-[#fa6723] cursor-pointer"
-                  onClick={() => setCurrentView("seller-help")}
-                >
-                  {t('footer.sell.seller_help')}
-                </li>
-                <li
-                  className="hover:text-[#fa6723] cursor-pointer"
                   onClick={() => setCurrentView("contact")}
                 >
                   {t('footer.help.contact')}
-                </li>
-                <li
-                  className="hover:text-[#fa6723] cursor-pointer"
-                  onClick={() => setCurrentView("resolution")}
-                >
-                  {t('footer.help.resolution')}
                 </li>
               </ul>
             </div>

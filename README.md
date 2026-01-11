@@ -6,14 +6,14 @@
 
 ## Overview
 
-SabaySell MVP is an electronics-focused marketplace built for the Cambodian market, supporting both Khmer and English languages. Users can list mobile phones, tablets, laptops, and accessories for sale, and connect with buyers instantly through Telegram or WhatsApp.
+SabaySell MVP is an electronics-focused marketplace built for the Cambodian market, supporting both Khmer and English languages. Users can list mobile phones and tablets for sale, and connect with buyers instantly through Telegram or WhatsApp. Following Peter Thiel's "Start Small and Monopolize" strategy, we focus on a narrow niche to dominate before expanding.
 
 **MVP Key Differentiators:**
-- **Electronics-focused**: Mobile Phones, Tablets & iPads, Laptops & Computers, Accessories
+- **Ultra-focused niche**: Mobile Phones & Tablets only (Laptops & Accessories hidden for future expansion)
 - **Frictionless contact**: Telegram/WhatsApp instant messaging (no in-app chat friction)
 - **Fixed-price only**: Simple, clear pricing (auctions hidden for MVP)
 - **Free to list**: No upfront costs
-- **SEO-optimized**: Target keywords like "buy iphone cambodia", "sell macbook phnom penh"
+- **SEO-optimized**: 100% focus on mobile device keywords like "buy iphone cambodia", "buy ipad phnom penh"
 - **Dual-language**: Khmer + English support
 - **Off-platform payments**: Cash, ABA, Wing (handled between buyer/seller)
 
@@ -50,7 +50,7 @@ SabaySell MVP is an electronics-focused marketplace built for the Cambodian mark
 ### MVP (Currently Live)
 - User authentication (Google/Facebook OAuth)
 - User profiles with reputation system
-- **Electronics-only categories** (Mobile Phones, Tablets, Laptops, Accessories)
+- **2-category niche focus** (Mobile Phones & Tablets only - applying Peter Thiel's "Start Small and Monopolize")
 - **Cascading spec dropdowns** (Brand → Model → Storage/RAM)
 - Listing management (create, edit, delete)
 - **Fixed-price listings only** (simple, frictionless)
@@ -61,9 +61,11 @@ SabaySell MVP is an electronics-focused marketplace built for the Cambodian mark
 - Boost system (PayPal integration ready, untested)
 
 ### Backend Ready (Hidden for MVP)
-**Easily re-enable by setting feature flags to `true`:**
+**Easily re-enable by setting feature flags/visibility:**
 - Auction & bidding system (`ENABLE_AUCTIONS = false`)
 - Real-time messaging with Socket.IO (`ENABLE_MESSAGING = false`)
+- Laptops & Computers category (`enabled: false` in categories config)
+- Accessories category (`enabled: false` in categories config)
 - Unread message counts
 - Bid history and live countdown timers
 

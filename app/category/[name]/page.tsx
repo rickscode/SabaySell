@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import { getListings } from "@/lib/queries/listings";
 import type { ListingWithImages } from "@/lib/database.types";
 import type { Product } from "@/components/product-card";
+import { getCategoryBySlug } from "@/lib/constants/categories";
 
 // Helper function to convert database listing to Product format
 function convertListingToProduct(listing: any): Product {
@@ -32,6 +33,27 @@ export default function CategoryPage() {
 
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Route guard: Redirect to homepage if category is disabled
+  useEffect(() => {
+    const categorySlugMap: Record<string, string> = {
+      "Mobile Phones": "phones",
+      "Tablets & iPads": "tablets",
+      "Laptops & Computers": "laptops",
+      "Accessories": "accessories",
+      "phones": "phones",
+      "tablets": "tablets",
+      "laptops": "laptops",
+      "accessories": "accessories",
+    };
+
+    const categorySlug = categorySlugMap[categoryName];
+    const categoryConfig = getCategoryBySlug(categorySlug);
+
+    if (!categoryConfig || !categoryConfig.enabled) {
+      router.push('/');
+    }
+  }, [categoryName, router]);
 
   // Load listings for this category
   useEffect(() => {
